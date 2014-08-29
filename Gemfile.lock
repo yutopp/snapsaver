@@ -1,0 +1,40 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    childprocess (0.5.3)
+      ffi (~> 1.0, >= 1.0.11)
+    ffi (1.9.3)
+    git (1.2.8)
+    headless (1.0.2)
+    msgpack (0.5.8)
+    multi_json (1.10.1)
+    rack (1.5.2)
+    rack-protection (1.5.3)
+      rack
+    rubyzip (1.1.6)
+    selenium-webdriver (2.42.0)
+      childprocess (>= 0.5.0)
+      multi_json (~> 1.0)
+      rubyzip (~> 1.0)
+      websocket (~> 1.0.4)
+    sinatra (1.4.5)
+      rack (~> 1.4)
+      rack-protection (~> 1.4)
+      tilt (~> 1.3, >= 1.3.4)
+    slim (2.0.3)
+      temple (~> 0.6.6)
+      tilt (>= 1.3.3, < 2.1)
+    temple (0.6.8)
+    tilt (1.4.1)
+    websocket (1.0.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  git
+  headless
+  msgpack
+  selenium-webdriver
+  sinatra
+  slim

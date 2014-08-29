@@ -1,0 +1,11 @@
+doctype html
+html
+    body
+        form action="/shoot/#{@site}" method="POST"
+            textarea name="commit_message" placeholder="コミットメッセージ"
+            input type="submit"
+        - if @is_new_commit_created
+            p
+                a href="#{@result}" #{@result}
+        - else
+            p #{@result}

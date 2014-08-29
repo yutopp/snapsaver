@@ -1,0 +1,9 @@
+doctype html
+html
+    body
+        form action="/edit/#{@site}" method="post"
+            textarea name="urls" #{@urls}
+            input type="submit"
+        p
+            a href="/shoot/#{@site}" shoot
+        p #{@message}

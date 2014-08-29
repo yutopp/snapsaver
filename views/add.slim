@@ -1,0 +1,8 @@
+doctype html
+html
+    body
+        form action="/add" method="post"
+            input type="text" name="site"
+            input type="submit"
+        p
+            a href="/edit/#{@site}" #{@site}
