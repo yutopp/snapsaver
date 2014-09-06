@@ -5,84 +5,66 @@ require 'slim'
 require 'json'
 require 'headless'
 require 'git'
+require 'securerandom'
+require 'digest/sha2'
 require './bitbucket-api'
 require './screenshooter.rb'
 
-user, password = JSON.load(File.read 'bitbucket.json')
+user, password = JSON.load(File.read('bitbucket.json'))
 api = Bitbucket::API.new(user, password)
 
-urls_map = {}
-urls_map = JSON.load(File.read('urls_map.json')) if File.exist?('urls_map.json')
-p urls_map
+sites = {}
+sites = JSON.load(File.read('sites.json')) if File.exist?('sites.json')
+p sites
 
-Signal.trap(:INT)  do File.write('urls_map.json', JSON.pretty_generate(urls_map)) end
-Signal.trap(:TERM) do File.write('urls_map.json', JSON.pretty_generate(urls_map)) end
+Signal.trap(:INT)  do File.write('sites.json', JSON.pretty_generate(sites)) end
+Signal.trap(:TERM) do File.write('sites.json', JSON.pretty_generate(sites)) end
 
 get '/' do
     'Yo!'
 end
 
 get '/add' do
-    @site=''
     slim :add
 end
 
-post '/add' do
+post '/edit' do
     site = params[:site]
 
-    if not urls_map.include? site
+    if sites.include? site
+        pass if Digest::SHA256.hexdigest(params[:password] + sites[site]['salt']) != sites[site]['salted_hash']
+    else
+        sites[site] = {}
+        sites[site]['urls'] = []
+        sites[site]['salt'] = SecureRandom.uuid()
+        sites[site]['salted_hash'] = Digest::SHA256.hexdigest(params[:password] + sites[site]['salt'])
+        p sites[site]
+
         p api.create_repository site
 
         repo = Git.clone("git@bitbucket.org:snapsaver/#{site}.git", site)
         repo.config('user.name', 'snapsaver')
         repo.config('user.email', 'snapsaver')
-
-        urls_map[site] = []
     end
 
     @site = site
-    slim :add
-end
-
-get '/edit/:site' do
-    site = params[:site]
-    pass if not urls_map.include? site
-
-    @site = site
-    @urls = urls_map[site].join("\n")
+    @urls = sites[site]['urls'].join("\n")
     slim :edit
 end
 
-post '/edit/:site' do
+post '/save' do
     site = params[:site]
-    pass if not urls_map.include? site
-
-    urls_map[site] = params[:urls].split("\n")
-                                  .map { |item| item.strip }
-                                  .reject { |item| item.empty? }
-
-    @site = site
-    @urls = urls_map[site].join("\n")
-    @message = "saved"
-    slim :edit
+    sites[site]['urls'] = params[:urls].split("\n").map{ |url| url.strip }.select{ |url| url =~ URI::regexp }
+    return "保存しました"
 end
 
-get '/shoot/:site' do
+post "/shoot" do
     site = params[:site]
-    pass if not urls_map.include? site
-
-    @site = site
-    slim :shoot
-end
-
-post "/shoot/:site" do
-    site = params[:site]
-    pass if not urls_map.include? site
 
     Headless.ly do
         shooter = ScreenShooter.new
         Dir.chdir(site) do
-            urls_map[site].each do |url|
+            sites[site]['urls'].each do |url|
                 shooter.shoot url
             end
         end
@@ -102,13 +84,8 @@ post "/shoot/:site" do
         end
         repo.push
 
-        @is_new_commit_created = true
-        @result = "https://bitbucket.org/snapsaver/#{site}/commits/#{repo.gcommit('HEAD').sha}"
+        "https://bitbucket.org/snapsaver/#{site}/commits/#{repo.gcommit('HEAD').sha}"
     else
-        @is_new_commit_created = false
-        @result = "変更はありません"
+        "変更はありません"
     end
-
-    @site = site
-    slim :shoot
 end

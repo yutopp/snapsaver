@@ -1,9 +1,32 @@
 doctype html
 html
+    head
+        script src="https://code.jquery.com/jquery-2.1.1.min.js"
+
+        javascript:
+            function save(){
+                var site = $('#site').text();
+                var urls = $('#urls').val();
+                $.post('/save', {site: site, urls: urls}, function(message){
+                    $('#save_info').text(message);
+                });
+            }
+
+            function shoot(){
+                var site = $('#site').text();
+                var commit_message = $('#commit_message').text();
+                $.post('/shoot', {site: site, commit_message: commit_message}, function(message){
+                    $('#commit_info').append($('<p>').append($('<a>', {href: message}).html(message)));
+                });
+            }
     body
-        form action="/edit/#{@site}" method="post"
-            textarea name="urls" #{@urls}
-            input type="submit"
-        p
-            a href="/shoot/#{@site}" shoot
-        p #{@message}
+        h1#site #{@site}
+        div
+            textarea#urls placeholder="URLリスト" #{@urls}
+            button onclick="save();" リスト保存
+            p#save_info
+
+        div
+            textarea#commit_message placeholder="コミットメッセージ"
+            button onclick="shoot();" スナップショットを取る
+            div#commit_info

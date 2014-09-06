@@ -1,8 +1,20 @@
 doctype html
 html
+    head
+        script src="https://code.jquery.com/jquery-2.1.1.min.js"
+        javascript:
+            function send(){
+                site = $('#site').val();
+                password = $('#pass').val();
+
+                $('<form>', {action: '/edit', method: 'post'})
+                    .append($('<input/>', {type: 'hidden', name: 'site', value: site}))
+                    .append($('<input/>', {type: 'hidden', name: 'password', value: password}))
+                    .appendTo(document.body)
+                    .submit();
+            }
     body
-        form action="/add" method="post"
-            input type="text" name="site"
-            input type="submit"
-        p
-            a href="/edit/#{@site}" #{@site}
+        div
+            input#site type="text" placeholder="サイト名"
+            input#pass type="password" placeholder="パスワード"
+            button type="submit" onclick="send();" GO
