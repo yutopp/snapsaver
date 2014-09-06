@@ -61,6 +61,10 @@ end
 post "/shoot" do
     site = params[:site]
 
+    if not sites.include? site
+        halt 404, {:error => "Requested site is not in our database"}.to_json
+    end
+
     Headless.ly do
         shooter = ScreenShooter.new
         Dir.chdir(site) do
@@ -71,7 +75,10 @@ post "/shoot" do
         shooter.close
     end
 
-    commit_message = params[:commit_message].strip
+    commit_message = ""
+    if params.include? :commit_message
+        commit_message = params[:commit_message].strip
+    end
 
     repo = Git.open(site)
     repo.add(:all => true)
@@ -84,8 +91,8 @@ post "/shoot" do
         end
         repo.push
 
-        "https://bitbucket.org/snapsaver/#{site}/commits/#{repo.gcommit('HEAD').sha}"
+        {:url => "https://bitbucket.org/snapsaver/#{site}/commits/#{repo.gcommit('HEAD').sha}"}.to_json
     else
-        "変更はありません"
+        halt 400, {:error => "No changes in URLs"}.to_json
     end
 end
