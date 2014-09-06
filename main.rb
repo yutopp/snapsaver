@@ -10,37 +10,42 @@ require 'digest/sha2'
 require './bitbucket-api'
 require './screenshooter.rb'
 
+configure do
+    enable :sessions
+end
+
 user, password = JSON.load(File.read('bitbucket.json'))
 api = Bitbucket::API.new(user, password)
 
 sites = {}
 sites = JSON.load(File.read('sites.json')) if File.exist?('sites.json')
-p sites
 
 Signal.trap(:INT)  do File.write('sites.json', JSON.pretty_generate(sites)) end
 Signal.trap(:TERM) do File.write('sites.json', JSON.pretty_generate(sites)) end
 
 get '/' do
-    'Yo!'
+    slim :index
 end
 
-get '/add' do
-    slim :add
+post '/save_session' do
+    session[:site] = params[:site];
+    session[:password] = params[:password];
+
+    redirect to('/edit')
 end
 
-post '/edit' do
-    site = params[:site]
+get '/edit' do
+    site = session[:site]
 
     if sites.include? site
-        pass if Digest::SHA256.hexdigest(params[:password] + sites[site]['salt']) != sites[site]['salted_hash']
+        pass if Digest::SHA256.hexdigest(session[:password] + sites[site]['salt']) != sites[site]['salted_hash']
     else
         sites[site] = {}
         sites[site]['urls'] = []
         sites[site]['salt'] = SecureRandom.uuid()
-        sites[site]['salted_hash'] = Digest::SHA256.hexdigest(params[:password] + sites[site]['salt'])
-        p sites[site]
+        sites[site]['salted_hash'] = Digest::SHA256.hexdigest(session[:password] + sites[site]['salt'])
 
-        p api.create_repository site
+        api.create_repository site
 
         repo = Git.clone("git@bitbucket.org:snapsaver/#{site}.git", site)
         repo.config('user.name', 'snapsaver')
@@ -48,18 +53,19 @@ post '/edit' do
     end
 
     @site = site
-    @urls = sites[site]['urls'].join("\n")
+    @urls = sites[site]['urls'].join("\\n")
     slim :edit
 end
 
 post '/save' do
-    site = params[:site]
+    site = session[:site]
+
     sites[site]['urls'] = params[:urls].split("\n").map{ |url| url.strip }.select{ |url| url =~ URI::regexp }
-    return "保存しました"
+    {:message => "保存しました", :urls => sites[site]['urls'].join("\n")}.to_json
 end
 
 post "/shoot" do
-    site = params[:site]
+    site = session[:site]
 
     if not sites.include? site
         halt 404, {:error => "Requested site is not in our database"}.to_json

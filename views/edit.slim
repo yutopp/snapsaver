@@ -1,35 +1,40 @@
 doctype html
-html
+html ng-app="app"
     head
         script src="https://code.jquery.com/jquery-2.1.1.min.js"
+        script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular.min.js"
 
         javascript:
-            function save(){
-                var site = $('#site').text();
-                var urls = $('#urls').val();
-                $.post('/save', {site: site, urls: urls}, function(message){
-                    $('#save_info').text(message);
-                });
-            }
+            angular.module('app', []).controller('ctrl', function($scope, $http){
+                $scope.urls = "#{@urls}";
 
-            function shoot(){
-                var site = $('#site').text();
-                var commit_message = $('#commit_message').text();
-                $.post('/shoot', {site: site, commit_message: commit_message}, function(message){
-                    $('#commit_info').append($('<p>').append($('<a>', {href: message.url}).html(message.url)));
-                }, 'json')
-                .fail(function(xhr){
-                    $('#commit_info').append($('<p>').html(xhr.responseJSON.error));
-                });
-            }
-    body
-        h1#site #{@site}
+                $scope.save = function(){
+                    $.post('/save', {urls: $scope.urls}, function(response){
+                        $scope.$apply(function(){
+                            $scope.urls = response.urls;
+                        });
+                        $('#save_info').text(response.message);
+                    }, 'json');
+                };
+
+                $scope.shoot = function(){
+                    $.post('/shoot', {commit_message: $scope.commit_message}, function(message){
+                        $('#commit_info').append($('<p>').append($('<a>', {href: message.url}).html(message.url)));
+                    }, 'json')
+                    .fail(function(xhr){
+                        $('#commit_info').append($('<p>').html(xhr.responseJSON.error));
+                    });
+                }
+            });
+            
+    body ng-controller="ctrl"
+        h1 #{@site}
         div
-            textarea#urls placeholder="URLリスト" #{@urls}
-            button onclick="save();" リスト保存
+            textarea ng-model="urls" placeholder="URLリスト"
+            button ng-click="save();" リスト保存
             p#save_info
 
         div
-            textarea#commit_message placeholder="コミットメッセージ"
-            button onclick="shoot();" スナップショットを取る
+            textarea ng-model="commit_message" placeholder="コミットメッセージ"
+            button ng-click="shoot();" スナップショットを取る
             div#commit_info
