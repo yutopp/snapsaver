@@ -6,7 +6,8 @@ html ng-app="app"
 
         javascript:
             angular.module('app', []).controller('ctrl', function($scope, $http){
-                $scope.urls = "#{@urls}";
+                $scope.urls = '#{@urls}';
+                $scope.commit_message = '';
 
                 $scope.save = function(){
                     $.post('/save', {urls: $scope.urls}, function(response){

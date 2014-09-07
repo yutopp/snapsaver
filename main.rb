@@ -65,25 +65,38 @@ post '/save' do
 end
 
 post "/shoot" do
-    site = session[:site]
+    if session.include? :site
+        site = session[:site]
+    else
+        halt 400, {:error => "site is required"}.to_json if not params.include? :site
+        halt 400, {:error => "password is required"}.to_json if not params.include? :password
+        halt 400, {:error => "invalid site or password"}.to_json if Digest::SHA256.hexdigest(session[:password] + sites[site]['salt']) != sites[site]['salted_hash']
+
+        site = params[:site]
+    end
 
     if not sites.include? site
-        halt 404, {:error => "Requested site is not in our database"}.to_json
+        halt 404, {:error => "requested site is not in our database"}.to_json
     end
 
     Headless.ly do
         shooter = ScreenShooter.new
         Dir.chdir(site) do
             sites[site]['urls'].each do |url|
-                shooter.shoot url
+                begin
+                    shooter.shoot url
+                rescue
+                    halt 500, {:error => "invalid URL: #{url}"}.to_json
+                end
             end
         end
         shooter.close
     end
 
-    commit_message = ""
     if params.include? :commit_message
         commit_message = params[:commit_message].strip
+    else
+        commit_message = ""
     end
 
     repo = Git.open(site)
