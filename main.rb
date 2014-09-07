@@ -25,15 +25,28 @@ sites = JSON.load(File.read('sites.json')) if File.exist?('sites.json')
 Signal.trap(:INT)  do File.write('sites.json', JSON.pretty_generate(sites)) end
 Signal.trap(:TERM) do File.write('sites.json', JSON.pretty_generate(sites)) end
 
+def show_server_error(status_code)
+    @status_code = status_code.to_s
+    slim :error
+end
+
+error do
+    show_server_error(500)
+end
+
 get '/' do
     slim :index
 end
 
 post '/save_session' do
-    session[:site] = params[:site];
-    session[:password] = params[:password];
+    if params[:site].empty?
+        show_server_error 400
+    else
+        session[:site] = params[:site];
+        session[:password] = params[:password];
 
-    redirect to('/edit')
+        redirect to('/edit')
+    end
 end
 
 get '/edit' do
