@@ -10,11 +10,6 @@ require 'digest/sha2'
 require './bitbucket-api'
 require './screenshooter.rb'
 
-configure do
-    enable :sessions
-    set :port, 80
-    set :bind, "0.0.0.0"
-end
 
 user, password = JSON.load(File.read('bitbucket.json'))
 api = Bitbucket::API.new(user, password)
@@ -28,6 +23,11 @@ Signal.trap(:TERM) do File.write('sites.json', JSON.pretty_generate(sites)) end
 def show_server_error(status_code)
     @status_code = status_code.to_s
     slim :error
+end
+
+configure do
+    use Rack::Session::Cookie
+    set :bind, "0.0.0.0"
 end
 
 error do
