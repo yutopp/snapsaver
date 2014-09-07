@@ -86,7 +86,7 @@ post "/shoot" do
                 begin
                     shooter.shoot url
                 rescue
-                    halt 500, {:error => "invalid URL: #{url}"}.to_json
+                    halt 400, {:error => "invalid URL: #{url}"}.to_json
                 end
             end
         end
