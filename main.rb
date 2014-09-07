@@ -130,7 +130,8 @@ post "/shoot" do
         else
             halt 400, {:error => "no changes in URLs"}.to_json
         end
-    rescue
+    rescue => e
+        p e
         halt 500, {:error => "internal server error"}.to_json
     end
 end
