@@ -2,6 +2,7 @@ require 'selenium-webdriver'
 
 class ScreenShooter
     def initialize
+        Selenium::WebDriver::Firefox.path = "vendor/firefox/firefox"
         @driver = Selenium::WebDriver.for :firefox
     end
 
