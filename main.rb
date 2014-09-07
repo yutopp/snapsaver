@@ -132,6 +132,7 @@ post "/shoot" do
         end
     rescue => e
         p e
+        puts e.backtrace.join("\n")
         halt 500, {:error => "internal server error"}.to_json
     end
 end
