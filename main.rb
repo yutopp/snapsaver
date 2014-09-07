@@ -128,7 +128,7 @@ post "/shoot" do
 
             {:url => "https://bitbucket.org/snapsaver/#{site}/commits/#{repo.gcommit('HEAD').sha}"}.to_json
         else
-            halt 400, {:error => "ro changes in URLs"}.to_json
+            halt 400, {:error => "no changes in URLs"}.to_json
         end
     rescue
         halt 500, {:error => "internal server error"}.to_json
