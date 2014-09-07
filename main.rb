@@ -12,6 +12,8 @@ require './screenshooter.rb'
 
 configure do
     enable :sessions
+    set :port, 80
+    set :bind, "0.0.0.0"
 end
 
 user, password = JSON.load(File.read('bitbucket.json'))
