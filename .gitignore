@@ -1,2 +1,5 @@
+vendor/*
+.bundle/*
+Gemfile.lock
 bitbucket.json
 sites.json
