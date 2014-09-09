@@ -7,6 +7,7 @@ require 'headless'
 require 'git'
 require 'securerandom'
 require 'digest/sha2'
+require 'uri'
 require './bitbucket-api'
 require './screenshooter.rb'
 
@@ -75,7 +76,7 @@ end
 post '/save' do
     site = session[:site]
 
-    sites[site]['urls'] = params[:urls].split("\n").map{ |url| url.strip }.select{ |url| url =~ URI::regexp }
+    sites[site]['urls'] = params[:urls].split("\n").map{ |url| url.strip }.select{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
     {:message => "保存しました", :urls => sites[site]['urls'].join("\n")}.to_json
 end
 
