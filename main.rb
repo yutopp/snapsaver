@@ -96,6 +96,10 @@ post "/shoot" do
             halt 404, {:error => "requested site is not in our database"}.to_json
         end
 
+        if sites[site]['urls'].size == 0
+            halt 400, {:error => "empty URL list"}.to_json
+        end
+
         Headless.ly do
             shooter = ScreenShooter.new
             Dir.chdir(site) do
