@@ -63,7 +63,7 @@ get '/edit' do
 
         api.create_repository site
 
-        repo = Git.clone("git@bitbucket.org:snapsaver/#{site}.git", site)
+        repo = Git.clone("git@bitbucket.org:snapsaver/#{site}.git", "repos/#{site}")
         repo.config('user.name', 'snapsaver')
         repo.config('user.email', 'snapsaver')
     end
@@ -102,7 +102,7 @@ post "/shoot" do
 
         Headless.ly do
             shooter = ScreenShooter.new
-            Dir.chdir(site) do
+            Dir.chdir("repos/#{site}") do
                 sites[site]['urls'].each do |url|
                     begin
                         shooter.shoot url
@@ -120,7 +120,7 @@ post "/shoot" do
             commit_message = ""
         end
 
-        repo = Git.open(site)
+        repo = Git.open("repos/#{site}")
         repo.add(:all => true)
 
         if repo.branches.size == 0 || repo.diff('HEAD', '--').size > 0

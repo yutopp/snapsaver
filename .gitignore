@@ -1,4 +1,5 @@
 vendor/*
+repos/*
 .bundle/*
 Gemfile.lock
 bitbucket.json
