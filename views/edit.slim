@@ -30,6 +30,8 @@ html ng-app="app"
 
     body ng-controller="ctrl"
         h1 #{@site}
+        p
+            a href="https://bitbucket.org/snapsaver/#{@site}/commits/all" https://bitbucket.org/snapsaver/#{@site}/commits/all
         div
             textarea ng-model="urls" placeholder="URLリスト"
             button ng-click="save();" リスト保存
