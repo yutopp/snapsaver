@@ -1,6 +1,8 @@
 # -*- encoding: utf-8 -*-
 
 require 'sinatra'
+require 'sinatra/json'
+require 'rack/contrib'
 require 'slim'
 require 'json'
 require 'headless'
@@ -28,6 +30,7 @@ end
 
 configure do
     use Rack::Session::Cookie
+    use Rack::PostBodyContentTypeParser
     set :bind, "0.0.0.0"
 end
 
