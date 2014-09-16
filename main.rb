@@ -87,7 +87,7 @@ get '/edit' do
     end
 end
 
-post '/save' do
+post '/save_urls' do
     site = session[:site]
 
     sites[site]['urls'] = params[:urls].split("\n").map{ |url| url.strip }.select{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }

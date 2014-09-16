@@ -11,7 +11,7 @@ html ng-app="app" style="height: 100%"
         $scope.logs = [];
 
         $scope.save = function(){
-          $http.post('/save', {urls: $scope.urls})
+          $http.post('/save_urls', {urls: $scope.urls})
           .success(function(data){
             $scope.urls = data.urls;
             $scope.logs.push({isURL: false, item: data.message});
