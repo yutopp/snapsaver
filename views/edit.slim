@@ -32,7 +32,7 @@ html ng-app="app" style="height: 100%"
       });
 
     body ng-controller="ctrl" style="height: 100%; margin: 0px"
-      div style="top: 0px; height: 100%; padding-bottom: 16rem; box-sizing: border-box"
+      div style="top: 0px; height: 100%; padding-bottom: 10rem; box-sizing: border-box;"
         h1 style="margin-top: 0px" #{@site}
         p
           a href="https://bitbucket.org/snapsaver/#{@site}/commits/all" https://bitbucket.org/snapsaver/#{@site}/commits/all
@@ -45,7 +45,7 @@ html ng-app="app" style="height: 100%"
           textarea ng-model="commit_message" placeholder="コミットメッセージ"
           button ng-click="shoot();" スナップショットを取る
 
-      div style="border: solid 2px #000; position: absolute; bottom: 0px; width: 100%; height: 16rem; overflow: auto; box-sizing: border-box"
-        p ng-repeat="log in logs"
-          a    ng-if=" log.isURL" href="{{log.item}}" {{log.item}}
-          span ng-if="!log.isURL"                     {{log.item}}
+      div style="border: solid 0.2rem #000; position: absolute; bottom: 0px; width: 100%; height: 10rem; overflow: auto; box-sizing: border-box"
+        p ng-repeat="log in logs" style="margin: 0px;"
+          a    ng-if=" log.isURL" href="{{log.item}}" {{$index}}: {{log.item}}
+          span ng-if="!log.isURL"                     {{$index}}: {{log.item}}
