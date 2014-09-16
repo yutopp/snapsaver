@@ -45,7 +45,7 @@ html ng-app="app" style="height: 100%"
           textarea ng-model="commit_message" placeholder="コミットメッセージ"
           button ng-click="shoot();" スナップショットを取る
 
-      div style="position: absolute; bottom: 0px; width: 100%; height: 16rem; overflow: auto"
+      div style="border: solid 2px #000; position: absolute; bottom: 0px; width: 100%; height: 16rem; overflow: auto; box-sizing: border-box"
         p ng-repeat="log in logs"
           a    ng-if=" log.isURL" href="{{log.item}}" {{log.item}}
           span ng-if="!log.isURL"                     {{log.item}}
