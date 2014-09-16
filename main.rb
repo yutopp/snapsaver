@@ -53,27 +53,38 @@ post '/save_session' do
     end
 end
 
+post '/delete_session' do
+    session[:site] = nil
+    session[:password] = nil
+
+    redirect to('/')
+end
+
 get '/edit' do
     site = session[:site]
 
-    if sites.include? site
-        pass if Digest::SHA256.hexdigest(session[:password] + sites[site]['salt']) != sites[site]['salted_hash']
+    if site.nil?
+        show_server_error 400
     else
-        sites[site] = {}
-        sites[site]['urls'] = []
-        sites[site]['salt'] = SecureRandom.uuid()
-        sites[site]['salted_hash'] = Digest::SHA256.hexdigest(session[:password] + sites[site]['salt'])
+        if sites.include? site
+            pass if Digest::SHA256.hexdigest(session[:password] + sites[site]['salt']) != sites[site]['salted_hash']
+        else
+            sites[site] = {}
+            sites[site]['urls'] = []
+            sites[site]['salt'] = SecureRandom.uuid()
+            sites[site]['salted_hash'] = Digest::SHA256.hexdigest(session[:password] + sites[site]['salt'])
 
-        api.create_repository site
+            api.create_repository site
 
-        repo = Git.clone("git@bitbucket.org:snapsaver/#{site}.git", "repos/#{site}")
-        repo.config('user.name', 'snapsaver')
-        repo.config('user.email', 'snapsaver')
+            repo = Git.clone("git@bitbucket.org:snapsaver/#{site}.git", "repos/#{site}")
+            repo.config('user.name', 'snapsaver')
+            repo.config('user.email', 'snapsaver')
+        end
+
+        @site = site
+        @urls = sites[site]['urls'].join("\\n")
+        slim :edit
     end
-
-    @site = site
-    @urls = sites[site]['urls'].join("\\n")
-    slim :edit
 end
 
 post '/save' do

@@ -45,6 +45,10 @@ html ng-app="app" style="height: 100%"
           textarea ng-model="commit_message" placeholder="コミットメッセージ"
           button ng-click="shoot();" スナップショットを取る
 
+        div
+          form action="/delete_session" method="post"
+            input type="submit" value="ログオフ"
+
       div style="border: solid 0.2rem #000; position: absolute; bottom: 0px; width: 100%; height: 10rem; overflow: auto; box-sizing: border-box"
         p ng-repeat="log in logs" style="margin: 0px;"
           a    ng-if=" log.isURL" href="{{log.item}}" {{$index}}: {{log.item}}
