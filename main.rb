@@ -90,8 +90,11 @@ end
 post '/save_urls' do
     site = session[:site]
 
-    sites[site]['urls'] = params[:urls].split("\n").map{ |url| url.strip }.select{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
-    {:message => "URLリストを保存しました", :urls => sites[site]['urls'].join("\n")}.to_json
+    urls = params[:urls].split("\n").map{ |url| url.strip }
+    valid_urls =   urls.select{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
+    invalid_urls = urls.reject{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
+    sites[site]['urls'] = valid_urls
+    {:message => "URLリストを保存しました", :urls => valid_urls.join("\n"), :invalid_urls => invalid_urls}.to_json
 end
 
 post "/shoot" do

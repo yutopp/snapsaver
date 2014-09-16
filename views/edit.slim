@@ -14,6 +14,9 @@ html ng-app="app" style="height: 100%"
           $http.post('/save_urls', {urls: $scope.urls})
           .success(function(data){
             $scope.urls = data.urls;
+            for(i = 0; i < data.invalid_urls.length; ++i){
+              $scope.logs.push({isURL: false, isError: true, item: "無効なURLです: " + data.invalid_urls[i]});
+            }
             $scope.logs.push({isURL: false, isError: false, item: data.message});
           }).error(function(data){
             console.log(data);
