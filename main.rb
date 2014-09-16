@@ -91,7 +91,7 @@ post '/save_urls' do
     site = session[:site]
 
     sites[site]['urls'] = params[:urls].split("\n").map{ |url| url.strip }.select{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
-    {:message => "保存しました", :urls => sites[site]['urls'].join("\n")}.to_json
+    {:message => "URLリストを保存しました", :urls => sites[site]['urls'].join("\n")}.to_json
 end
 
 post "/shoot" do
