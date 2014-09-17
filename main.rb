@@ -70,16 +70,20 @@ get '/edit' do
         if sites.include? site
             pass if Digest::SHA256.hexdigest(session[:password] + sites[site]['salt']) != sites[site]['salted_hash']
         else
-            sites[site] = {}
-            sites[site]['urls'] = []
-            sites[site]['salt'] = SecureRandom.uuid()
-            sites[site]['salted_hash'] = Digest::SHA256.hexdigest(session[:password] + sites[site]['salt'])
+            begin
+                api.create_repository site
 
-            api.create_repository site
+                sites[site] = {}
+                sites[site]['urls'] = []
+                sites[site]['salt'] = SecureRandom.uuid()
+                sites[site]['salted_hash'] = Digest::SHA256.hexdigest(session[:password] + sites[site]['salt'])
 
-            repo = Git.clone("git@bitbucket.org:snapsaver/#{site}.git", "repos/#{site}")
-            repo.config('user.name', 'snapsaver')
-            repo.config('user.email', 'snapsaver')
+                repo = Git.clone("git@bitbucket.org:snapsaver/#{site}.git", "repos/#{site}")
+                repo.config('user.name', 'snapsaver')
+                repo.config('user.email', 'snapsaver')
+            rescue
+                return show_error 400, "cannot create repository"
+            end
         end
 
         @site = site
