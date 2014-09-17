@@ -15,9 +15,9 @@ html ng-app="app" style="height: 100%"
           .success(function(data){
             $scope.urls = data.urls;
             for(i = 0; i < data.invalid_urls.length; ++i){
-              $scope.logs.push({isURL: false, isError: true, item: "無効なURLです: " + data.invalid_urls[i]});
+              $scope.logs.push({time: new Date().toLocaleTimeString(), isURL: false, isError: true, item: "無効なURLです: " + data.invalid_urls[i]});
             }
-            $scope.logs.push({isURL: false, isError: false, item: data.message});
+            $scope.logs.push({time: new Date().toLocaleTimeString(), isURL: false, isError: false, item: data.message});
           }).error(function(data){
             console.log(data);
           });
@@ -26,10 +26,10 @@ html ng-app="app" style="height: 100%"
         $scope.shoot = function(){
           $http.post('/shoot', {commit_message: $scope.commit_message})
           .success(function(data){
-            $scope.logs.push({isURL: true, isError: false, item: data.url});
+            $scope.logs.push({time: new Date().toLocaleTimeString(), isURL: true, isError: false, item: data.url});
           })
           .error(function(data){
-            $scope.logs.push({isURL: false, isError: true, item: data.error});
+            $scope.logs.push({time: new Date().toLocaleTimeString(), isURL: false, isError: true, item: data.error});
           });
         };
       });
@@ -54,5 +54,5 @@ html ng-app="app" style="height: 100%"
 
       div style="border: solid 0.2rem #000; position: absolute; bottom: 0px; width: 100%; height: 10rem; overflow: auto; box-sizing: border-box"
         p ng-repeat="log in logs" style="margin: 0px;"
-          a    ng-if=" log.isURL" ng-style="log.isError ? {color: 'red'} : {}" href="{{log.item}}" {{$index}}: {{log.item}}
-          span ng-if="!log.isURL" ng-style="log.isError ? {color: 'red'} : {}"                     {{$index}}: {{log.item}}
+          a    ng-if=" log.isURL" ng-style="log.isError ? {color: 'red'} : {}" href="{{log.item}}" [{{log.time}}] {{log.item}}
+          span ng-if="!log.isURL" ng-style="log.isError ? {color: 'red'} : {}"                     [{{log.time}}] {{log.item}}
