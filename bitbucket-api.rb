@@ -16,8 +16,10 @@ module Bitbucket
             sock.use_ssl = true
             sock.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-            sock.start do |s|
-                s.request(req).body
+            sock.start do |http|
+                response = http.request(req)
+                raise response.body if response.code != '200'
+                response.body
             end
         end
 
