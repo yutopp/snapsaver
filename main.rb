@@ -23,8 +23,9 @@ sites = JSON.load(File.read('sites.json')) if File.exist?('sites.json')
 Signal.trap(:INT)  do File.write('sites.json', JSON.pretty_generate(sites)) end
 Signal.trap(:TERM) do File.write('sites.json', JSON.pretty_generate(sites)) end
 
-def show_server_error(status_code)
+def show_error(status_code, message)
     @status_code = status_code.to_s
+    @message = message
     slim :error
 end
 
@@ -35,7 +36,7 @@ configure do
 end
 
 error do
-    show_server_error(500)
+    show_error 500, "internal server error"
 end
 
 get '/' do
@@ -44,7 +45,7 @@ end
 
 post '/save_session' do
     if params[:site].empty?
-        show_server_error 400
+        show_error 400, "invalid site name"
     else
         session[:site] = params[:site];
         session[:password] = params[:password];
@@ -64,7 +65,7 @@ get '/edit' do
     site = session[:site]
 
     if site.nil?
-        show_server_error 400
+        show_error 400, "invalid session"
     else
         if sites.include? site
             pass if Digest::SHA256.hexdigest(session[:password] + sites[site]['salt']) != sites[site]['salted_hash']
