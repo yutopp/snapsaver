@@ -30,7 +30,7 @@ def show_error(status_code, message)
 end
 
 configure do
-    use Rack::Session::Cookie
+    use Rack::Session::Cookie, :secret => "すなっぷせぇばぁ"
     use Rack::PostBodyContentTypeParser
     set :bind, "0.0.0.0"
 end
