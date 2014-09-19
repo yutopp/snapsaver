@@ -88,6 +88,7 @@ get '/edit' do
 
         @site = site
         @urls = sites[site]['urls'].join("\\n")
+        @urls_size = sites[site]['urls'].size
         slim :edit
     end
 end
@@ -99,7 +100,7 @@ post '/save_urls' do
     valid_urls =   urls.select{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
     invalid_urls = urls.reject{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
     sites[site]['urls'] = valid_urls
-    {:message => "URLリストを保存しました", :urls => valid_urls.join("\n"), :invalid_urls => invalid_urls}.to_json
+    {:message => "URLリストを保存しました", :urls => valid_urls.join("\n"), :urls_size => valid_urls.size, :invalid_urls => invalid_urls}.to_json
 end
 
 post "/shoot" do
@@ -122,18 +123,46 @@ post "/shoot" do
             halt 400, {:error => "empty URL list"}.to_json
         end
 
+        index = params[:index]
+
+        if sites[site]['urls'].size <= index
+            halt 400, {:error => "index out of range"}
+        end
+
         Headless.ly do
             shooter = ScreenShooter.new
             Dir.chdir("repos/#{site}") do
-                sites[site]['urls'].each do |url|
-                    begin
-                        shooter.shoot url
-                    rescue
-                        halt 400, {:error => "invalid URL: #{url}"}.to_json
-                    end
+                begin
+                    shooter.shoot sites[site]['urls'][index]
+                rescue
+                    halt 400, {:error => "invalid URL: #{url}"}.to_json
                 end
             end
             shooter.close
+        end
+
+        {:url => sites[site]['urls'][index], :last => index + 1 == sites[site]['urls'].size}.to_json
+    rescue => e
+        p e
+        puts e.backtrace.join("\n")
+        halt 500, {:error => "internal server error"}.to_json
+    end
+end
+
+post '/push_repository' do
+    begin
+        if session.include? :site
+            site = session[:site]
+        else
+            halt 400, {:error => "site is required"}.to_json if not params.include? :site
+            halt 400, {:error => "password is required"}.to_json if not params.include? :password
+            halt 400, {:error => "invalid site or password"}.to_json if Digest::SHA256.hexdigest(session[:password] + sites[site]['salt']) != sites[site]['salted_hash']
+
+            site = params[:site]
+        end
+
+        if not sites.include? site
+            halt 404, {:error => "requested site is not in our database"}.to_json
         end
 
         if params.include? :commit_message

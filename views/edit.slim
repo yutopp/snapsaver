@@ -7,29 +7,53 @@ html ng-app="app" style="height: 100%"
     javascript:
       angular.module('app', []).controller('ctrl', function($scope, $http){
         $scope.urls = '#{@urls}';
+        $scope.urlsSize = #{@urls_size}
         $scope.commit_message = '';
         $scope.logs = [];
+
+        function pushLog(log){
+          log.time = new Date().toLocaleTimeString();
+          $scope.logs.push(log);
+        }
 
         $scope.save = function(){
           $http.post('/save_urls', {urls: $scope.urls})
           .success(function(data){
             $scope.urls = data.urls;
+            $scope.urlsSize = data.urls_size;
             for(i = 0; i < data.invalid_urls.length; ++i){
-              $scope.logs.push({time: new Date().toLocaleTimeString(), isURL: false, isError: true, item: "無効なURLです: " + data.invalid_urls[i]});
+              pushLog({isURL: false, isError: true, item: "無効なURLです: " + data.invalid_urls[i]});
             }
-            $scope.logs.push({time: new Date().toLocaleTimeString(), isURL: false, isError: false, item: data.message});
+            pushLog({isURL: false, isError: false, item: data.message});
           }).error(function(data){
             console.log(data);
           });
         };
 
-        $scope.shoot = function(){
-          $http.post('/shoot', {commit_message: $scope.commit_message})
+        $scope.shoot = function(index){
+          if (index === 0){
+            pushLog({isURL: false, isError: false, item: "撮り始めます"});
+          }
+
+          $http.post('/shoot', {index: index})
           .success(function(data){
-            $scope.logs.push({time: new Date().toLocaleTimeString(), isURL: true, isError: false, item: data.url});
+            pushLog({isURL: false, isError: false, item: "(" + (index + 1) + "/" + ($scope.urlsSize + 1) + ")完了: " + data.url});
+
+            if (data.last){
+              $http.post('/push_repository', {commit_message: $scope.commit_message})
+              .success(function(data){
+                pushLog({isURL: false, isError: false, item: "(" + ($scope.urlsSize + 1) + "/" + ($scope.urlsSize + 1) + ")push完了"});
+                pushLog({isURL: true, isError: false, item: data.url});
+              })
+              .error(function(data){
+                pushLog({isURL: false, isError: true, item: data.error});
+              });
+            } else {
+              $scope.shoot(index + 1);
+            }
           })
           .error(function(data){
-            $scope.logs.push({time: new Date().toLocaleTimeString(), isURL: false, isError: true, item: data.error});
+            pushLog({isURL: false, isError: true, item: data.error});
           });
         };
       });
@@ -46,7 +70,7 @@ html ng-app="app" style="height: 100%"
 
         div
           textarea ng-model="commit_message" placeholder="コミットメッセージ"
-          button ng-click="shoot();" スナップショットを取る
+          button ng-click="shoot(0);" スナップショットを取る
 
         div
           form action="/delete_session" method="post"
