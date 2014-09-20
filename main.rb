@@ -68,7 +68,7 @@ get '/edit' do
         show_error 400, "invalid session"
     else
         if sites.include? site
-            pass if Digest::SHA256.hexdigest(session[:password] + sites[site]['salt']) != sites[site]['salted_hash']
+            show_error 401, "invalid site or password" if Digest::SHA256.hexdigest(session[:password] + sites[site]['salt']) != sites[site]['salted_hash']
         else
             begin
                 api.create_repository site
@@ -84,12 +84,12 @@ get '/edit' do
             rescue
                 return show_error 400, "cannot create repository"
             end
-        end
 
-        @site = site
-        @urls = sites[site]['urls'].join("\\n")
-        @urls_size = sites[site]['urls'].size
-        slim :edit
+            @site = site
+            @urls = sites[site]['urls'].join("\\n")
+            @urls_size = sites[site]['urls'].size
+            slim :edit
+        end
     end
 end
 
