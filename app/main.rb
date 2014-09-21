@@ -93,12 +93,12 @@ get "/edit" do
             rescue
                 return show_error 400, "cannot create repository"
             end
-
-            @site = site
-            @urls = sites[site]["urls"].join("\\n")
-            @urls_size = sites[site]["urls"].size
-            slim :edit
         end
+
+        @site = site
+        @urls = sites[site]["urls"].join("\\n")
+        @urls_size = sites[site]["urls"].size
+        slim :edit
     end
 end
 
