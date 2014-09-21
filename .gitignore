@@ -1,6 +1,8 @@
-vendor/*
-repos/*
-.bundle/*
-Gemfile.lock
-bitbucket.json
-sites.json
+app/Gemfile.lock
+app/vendor/*
+app/.bundle/*
+repo/*
+!repo/KEEPME
+db/*
+!db/KEEPME
+config.yml
