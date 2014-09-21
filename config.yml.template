@@ -1,0 +1,4 @@
+rack_secret: ""
+bitbucket:
+    user: ""
+    password: ""
