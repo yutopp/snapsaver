@@ -1,0 +1,5 @@
+<form action="/make_session" method="post">
+    <input type="text" name="site" placeholder="サイト名"/>
+    <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
+    <input type="submit" value="GO"/>
+</form>
