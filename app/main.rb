@@ -29,8 +29,17 @@ api = Bitbucket::API.new config["bitbucket"]["user"], config["bitbucket"]["passw
 sites = {}
 sites = JSON.load(File.read("../db/sites.json")) if File.exist?("../db/sites.json")
 
-Signal.trap(:INT)  do File.write("../db/sites.json", JSON.pretty_generate(sites)) end
-Signal.trap(:TERM) do File.write("../db/sites.json", JSON.pretty_generate(sites)) end
+headless = Headless.new
+
+Signal.trap(:INT)  do
+  File.write("../db/sites.json", JSON.pretty_generate(sites))
+  headless.destroy
+end
+
+Signal.trap(:TERM) do
+  File.write("../db/sites.json", JSON.pretty_generate(sites))
+  headless.destroy
+end
 
 def show_error(status_code, message)
   @status_code = status_code.to_s
@@ -117,11 +126,12 @@ post "/shoot" do
     if session.include? :site
       site = session[:site]
     else
-      halt 400, {:error => "site is required"}.to_json if not params.include? :site
-      halt 400, {:error => "password is required"}.to_json if not params.include? :password
-      halt 400, {:error => "invalid site or password"}.to_json if Digest::SHA256.hexdigest(session[:password] + sites[site]["salt"]) != sites[site]["salted_hash"]
+      halt 400, {:error => "invalid session"}.to_json
+      #halt 400, {:error => "site is required"}.to_json if not params.include? :site
+      #halt 400, {:error => "password is required"}.to_json if not params.include? :password
+      #halt 400, {:error => "invalid site or password"}.to_json if Digest::SHA256.hexdigest(session[:password] + sites[site]["salt"]) != sites[site]["salted_hash"]
 
-      site = params[:site]
+      #site = params[:site]
     end
 
     if not sites.include? site
@@ -138,16 +148,22 @@ post "/shoot" do
       halt 400, {:error => "index out of range"}
     end
 
-    Headless.ly do
-      shooter = ScreenShooter.new
-      Dir.chdir("../repo/#{site}") do
-        begin
-          shooter.shoot sites[site]["urls"][index]
-        rescue
-          halt 400, {:error => "invalid URL: #{url}"}.to_json
-        end
+    if index == 0
+      headless.start
+      session[:session] = ScreenShooter.new
+    end
+
+    Dir.chdir("../repo/#{site}") do
+      begin
+        session[:session].shoot sites[site]["urls"][index]
+      rescue
+        halt 400, {:error => "invalid URL: #{url}"}.to_json
       end
-      shooter.close
+    end
+
+    if index + 1 == sites[site]["urls"].size
+      session[:session].close
+      headless.stop
     end
 
     {:url => sites[site]["urls"][index], :last => index + 1 == sites[site]["urls"].size}.to_json
