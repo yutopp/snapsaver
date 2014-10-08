@@ -2,7 +2,7 @@
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 
-angular.module('app', []).controller 'ctrl', ($scope, $http) ->
+angular.module('app', []).controller 'ctrl', ['$scope', '$http', ($scope, $http) ->
   $scope.commit_message = ''
   $scope.logs = []
 
@@ -46,3 +46,4 @@ angular.module('app', []).controller 'ctrl', ($scope, $http) ->
       .fail (data) ->
         $scope.$apply () ->
           pushLog {isURL: false, isError: true, item: data.responseJSON.error}
+]
