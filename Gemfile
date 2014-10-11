@@ -42,5 +42,6 @@ gem 'spring',        group: :development
 gem 'dotenv-rails'
 gem 'git'
 gem 'selenium-webdriver'
+gem "headless"
 
 gem "rails-assets-angular"
