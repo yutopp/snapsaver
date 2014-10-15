@@ -16,7 +16,7 @@ class InnerApiController < ApplicationController
     invalid_urls = urls.reject{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
     valid_urls_str = valid_urls.join "\n"
 
-    site = Site.where(["name = ?", site_name]).first
+    site = Site.find_by name: site_name
     site.urls = valid_urls_str
     site.save
 
@@ -35,7 +35,7 @@ class InnerApiController < ApplicationController
         return
       end
 
-      site = Site.where(["name = ?", site_name]).first
+      site = Site.find_by name: site_name
 
       if site.nil?
         render status: 400, json: {error: "invalid session"}
@@ -96,7 +96,7 @@ class InnerApiController < ApplicationController
         return
       end
 
-      site = Site.where(["name = ?", site_name]).first
+      site = Site.find_by name: site_name
 
       if site.nil?
         render status: 400, json: {error: "invalid session"}

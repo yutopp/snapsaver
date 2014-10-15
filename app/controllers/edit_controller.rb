@@ -11,7 +11,7 @@ class EditController < ApplicationController
       return
     end
 
-    site = Site.where(["name = ?", site_name]).first
+    site = Site.find_by name: site_name
 
     if site.nil?
       begin
