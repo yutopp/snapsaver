@@ -43,5 +43,6 @@ gem 'dotenv-rails'
 gem 'git'
 gem 'selenium-webdriver'
 gem "headless"
+gem "devise"
 
 gem "rails-assets-angular"

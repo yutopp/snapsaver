@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  devise_for :users
+
   post 'inner_api/save_urls'
 
   post 'inner_api/shoot'
@@ -12,6 +14,7 @@ Rails.application.routes.draw do
   post 'delete_session' => "site_session#delete"
 
   root "home#home"
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
