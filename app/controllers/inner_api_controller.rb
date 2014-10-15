@@ -12,8 +12,8 @@ class InnerApiController < ApplicationController
     end
 
     urls = params[:urls].split("\n").map{ |url| url.strip }
-    valid_urls =   urls.select{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
-    invalid_urls = urls.reject{ |url| begin URI.parse(url).kind_of?(URI::HTTP) rescue false end }
+    valid_urls =   urls.select{ |url| URI.parse(url).kind_of?(URI::HTTP) rescue false }
+    invalid_urls = urls.reject{ |url| URI.parse(url).kind_of?(URI::HTTP) rescue false }
     valid_urls_str = valid_urls.join "\n"
 
     site = Site.find_by name: site_name
