@@ -27,7 +27,14 @@ module InnerApiHelper
   class ScreenShooter
     def initialize
       Selenium::WebDriver::Firefox.path = "vendor/firefox/firefox"
-      @driver = Selenium::WebDriver.for :firefox
+
+      profile = Selenium::WebDriver::Firefox::Profile.new
+      profile['browser.cache.disk.enable'] = false
+      profile['browser.cache.memory.enable'] = false
+      profile['browser.cache.offline.enable'] = false
+      profile['network.http.use-cache'] = false
+
+      @driver = Selenium::WebDriver.for :firefox, profile: profile
     end
 
     def shoot(url)
