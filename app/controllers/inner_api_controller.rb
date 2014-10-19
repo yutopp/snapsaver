@@ -1,14 +1,31 @@
+require "securerandom"
+
 include InnerApiHelper
 
 class InnerApiController < ApplicationController
   @@screen_shooters = {}
 
-  def save_urls
-    site_name = session[:site_name]
+  def make_id
+    id = SecureRandom.uuid
 
-    if site_name.nil?
-      render json: {error: "invalid session"}
-      return
+    create_bitbucket_repository id
+
+    repo = Git.clone "git@bitbucket.org:#{ENV["BITBUCKET_USER"]}/#{id}.git", "repo/#{id}"
+    repo.config "user.name", ENV["BITBUCKET_USER"]
+    repo.config "user.email", ENV["BITBUCKET_USER"]
+
+    Site.create name: id, urls: params[:urls]
+    redirect_to "/id/#{id}"
+  end
+
+  def save_urls
+    if user_signed_in?
+      current_site_name = user_session["current_site_name"]
+
+      if current_site_name.nil?
+        render json: {error: "invalid session"}
+        return
+      end
     end
 
     urls = params[:urls].split("\n").map{ |url| url.strip }
@@ -16,9 +33,15 @@ class InnerApiController < ApplicationController
     invalid_urls = urls.reject{ |url| URI.parse(url).kind_of?(URI::HTTP) rescue false }
     valid_urls_str = valid_urls.join "\n"
 
-    site = Site.find_by name: site_name
-    site.urls = valid_urls_str
-    site.save
+    if user_signed_in?
+      site = current_user.sites.find_by name: current_site_name
+      site.urls = valid_urls_str
+      site.save
+    else
+      site = Site.find_by name: params[:id]
+      site.urls = valid_urls_str
+      site.save
+    end
 
     render json: {message: "URLリストを保存しました",
                   urls: valid_urls_str,
@@ -28,14 +51,22 @@ class InnerApiController < ApplicationController
 
   def shoot
     begin
-      site_name = session[:site_name]
+      if user_signed_in?
+        site_name = user_session["current_site_name"]
+      else
+        site_name = params[:id]
+      end
 
       if site_name.nil?
         render status: 400, json: {error: "invalid session"}
         return
       end
 
-      site = Site.find_by name: site_name
+      if user_signed_in?
+        site = current_user.sites.find_by name: site_name
+      else
+        site = Site.find_by name: site_name
+      end
 
       if site.nil?
         render status: 400, json: {error: "invalid session"}
@@ -89,14 +120,22 @@ class InnerApiController < ApplicationController
 
   def push_repository
     begin
-      site_name = session[:site_name]
+      if user_signed_in?
+        site_name = user_session["current_site_name"]
+      else
+        site_name = params[:id]
+      end
 
       if site_name.nil?
         render status: 400, json: {error: "invalid session"}
         return
       end
 
-      site = Site.find_by name: site_name
+      if user_signed_in?
+        site = current_user.sites.find_by name: site_name
+      else
+        site = Site.find_by name: site_name
+      end
 
       if site.nil?
         render status: 400, json: {error: "invalid session"}

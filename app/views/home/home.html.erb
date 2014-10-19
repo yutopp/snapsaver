@@ -1,5 +1,63 @@
-<form action="/make_session" method="post">
-    <input type="text" name="site" placeholder="サイト名"/>
-    <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
-    <input type="submit" value="GO"/>
-</form>
+<div ng-app="app">
+    <div ng-controller="ctrl">
+        <div ng-init="urlsSize = <%= @urls_size %>"></div>
+        <div ng-init="sites = <%= @sites.to_s %>; siteSelected = '<%= @site %>'"></div>
+        <div ng-init="id = '<%= @id %>'"></div>
+
+        <div style="height: 100%; margin: 0px">
+            <div style="top: 0px; height: 100%; width: 50%; box-sizing: border-box;">
+                <% if user_signed_in? %>
+                    <h1 style="margin-top: 0px"><%= @site %></h1>
+                    <p><a ng-href="https://bitbucket.org/snapsaver/<%= @site %>/commits/all">https://bitbucket.org/snapsaver/<%= @site %>/commits/all</a></p>
+                <% elsif @id %>
+                    <p><a ng-href="https://bitbucket.org/snapsaver/<%= @id %>/commits/all">https://bitbucket.org/snapsaver/<%= @id %>/commits/all</a></p>
+                <% end %>
+            </div>
+
+            <div>
+                <textarea ng-model="urls" ng-init="urls = '<%= @urls %>'" placeholder="URLリスト"></textarea>
+                <% if user_signed_in? || @id %>
+                    <button ng-click="save();">リスト保存</button>
+                <% else %>
+                    <form action="/inner_api/make_id" method="post" >
+                        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
+                        <input type="hidden" name="urls" ng-value="urls"></input>
+                        <input type="submit" value="リスト保存"></input>
+                    </form>
+                <% end %>
+            </div>
+
+            <% if user_signed_in? || @id %>
+                <div>
+                    <textarea ng-model="commit_message" placeholder="コミットメッセージ"></textarea>
+                    <button ng-click="shoot(0);">スナップショットを取る</button>
+                </div>
+            <% end %>
+
+            <div>
+                <% if user_signed_in? %>
+                    <form action="/home/change_site" method="post">
+                        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
+                        <select name="site" ng-model="siteSelected" ng-options="site for site in sites track by site"/>
+                        <input type="submit" value="サイト変更"/>
+                    </form>
+                    <form action="/home/add_site" method="post">
+                        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
+                        <input type="text"   name="site"/>
+                        <input type="submit" value="サイト追加"/>
+                    </form>
+                    <p><%= link_to "ログアウト", destroy_user_session_path, method: :delete %></p>
+                <% else %>
+                    <p><%= link_to "ログイン", new_user_session_path %></p>
+                <% end %>
+            </div>
+        </div>
+
+        <div style="border: solid 0.2rem #000; position: absolute; left: 50%; top: 0px; width: 50%; height: 100%; overflow: auto; box-sizing: border-box">
+            <div ng-repeat="log in logs">
+                <a    ng-if=" log.isURL" ng-style="log.isError ? {color: 'red'} : {}" href="{{log.item}}">[{{log.time}}] {{log.item}}</a>
+                <span ng-if="!log.isURL" ng-style="log.isError ? {color: 'red'} : {}"                    >[{{log.time}}] {{log.item}}</span>
+            </div>
+        </div>
+    </div>
+</div>

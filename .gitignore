@@ -16,5 +16,6 @@
 /tmp
 
 .env
+!.env.template
 repo/*
 vendor/firefox/*

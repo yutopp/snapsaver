@@ -1,17 +1,21 @@
 Rails.application.routes.draw do
   devise_for :users
 
+  post "inner_api/make_id"
   post 'inner_api/save_urls'
-
   post 'inner_api/shoot'
-
   post 'inner_api/push_repository'
+
+  get "/id/:id" => "home#home"
 
   get '/edit' => "edit#edit"
 
   post 'make_session' => "site_session#make"
 
   post 'delete_session' => "site_session#delete"
+
+  post "/home/add_site"
+  post "/home/change_site"
 
   root "home#home"
 
