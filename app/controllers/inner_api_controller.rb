@@ -98,6 +98,10 @@ class InnerApiController < ApplicationController
         rescue => e
           p e
           puts e.backtrace.join("\n")
+
+          @@screen_shooters[session_id].close
+          @@screen_shooters.delete session_id
+
           render status: 400, json: {error: "invalid URL: #{urls[index]}"}
           return
         end
