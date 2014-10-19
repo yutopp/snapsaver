@@ -36,7 +36,7 @@ module InnerApiHelper
     end
 
     def close
-      @driver.close
+      @driver.quit
     end
   end
 end
