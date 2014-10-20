@@ -36,6 +36,7 @@ ActiveRecord::Schema.define(version: 20141011095502) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
+    t.string   "uuid"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

@@ -64,6 +64,8 @@ class InnerApiController < ApplicationController
 
       if user_signed_in?
         site = current_user.sites.find_by name: site_name
+        # FIXME: 非常にアレな実装。repository_nameとかを使うべき
+        site_name = current_user.uuid + "-" + site_name
       else
         site = Site.find_by name: site_name
       end
@@ -137,6 +139,7 @@ class InnerApiController < ApplicationController
 
       if user_signed_in?
         site = current_user.sites.find_by name: site_name
+        site_name = current_user.uuid + "-" + site_name
       else
         site = Site.find_by name: site_name
       end

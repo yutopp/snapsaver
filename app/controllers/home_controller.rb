@@ -1,5 +1,7 @@
 include HomeHelper
 
+require "securerandom"
+
 class HomeController < ApplicationController
   def home
     if user_signed_in?
@@ -7,7 +9,11 @@ class HomeController < ApplicationController
 
       if sites.empty?
         begin
-          create_bitbucket_repository "default"
+          uuid = SecureRandom.uuid
+          current_user.uuid = uuid
+          current_user.save!
+
+          create_bitbucket_repository "#{uuid}-default"
         rescue BitbucketAPIException
           @status = 400
           @message = "cannot create repository"
@@ -15,7 +21,7 @@ class HomeController < ApplicationController
           return
         end
 
-        repo = Git.clone "git@bitbucket.org:#{ENV["BITBUCKET_USER"]}/default.git", "repo/default"
+        repo = Git.clone "git@bitbucket.org:#{ENV["BITBUCKET_USER"]}/#{uuid}-default.git", "repo/#{uuid}-default"
         repo.config "user.name", ENV["BITBUCKET_USER"]
         repo.config "user.email", ENV["BITBUCKET_USER"]
 
@@ -35,7 +41,7 @@ class HomeController < ApplicationController
       @urls = site.urls
       @urls_size = @urls.count("\n") + 1
 
-      @site = user_session["current_site_name"]
+      @uuid = current_user.uuid
     elsif params[:id]
       @id = params[:id]
       @site = @id
@@ -46,10 +52,11 @@ class HomeController < ApplicationController
   end
 
   def add_site
-    current_site_name = params[:site]
+    adding_site_name = params[:site]
+    uuid = current_user.uuid
 
     begin
-      create_bitbucket_repository current_site_name
+      create_bitbucket_repository uuid + "-" + adding_site_name
     rescue BitbucketAPIException
       @status = 400
       @message = "cannot create repository"
@@ -57,12 +64,12 @@ class HomeController < ApplicationController
       return
     end
 
-    repo = Git.clone "git@bitbucket.org:#{ENV["BITBUCKET_USER"]}/#{current_site_name}.git", "repo/#{current_site_name}"
+    repo = Git.clone "git@bitbucket.org:#{ENV["BITBUCKET_USER"]}/#{uuid}-#{adding_site_name}.git", "repo/#{uuid}-#{adding_site_name}"
     repo.config "user.name", ENV["BITBUCKET_USER"]
     repo.config "user.email", ENV["BITBUCKET_USER"]
 
-    current_user.sites.create! name: current_site_name, urls: ""
-    user_session["current_site_name"] = current_site_name
+    current_user.sites.create! name: adding_site_name, urls: ""
+    user_session["current_site_name"] = adding_site_name
     redirect_to "/"
   end
 
