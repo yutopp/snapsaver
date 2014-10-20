@@ -39,6 +39,14 @@ module InnerApiHelper
 
     def shoot(url)
       @driver.navigate.to url
+
+      @driver.execute_script <<-"JavaScript"
+        boxes = document.getElementsByClassName("fb-like-box")
+        for (i = 0; i < boxes.length; ++i) {
+          boxes[i].style.opacity = 0;
+        }
+      JavaScript
+
       @driver.save_screenshot("#{url.gsub("/", "_")}.png")
     end
 
