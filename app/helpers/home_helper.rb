@@ -1,4 +1,5 @@
 module HomeHelper
+  # FIXME: inner_api_helperと重複してる
   class BitbucketAPIException < Exception
   end
 

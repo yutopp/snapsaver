@@ -6,18 +6,11 @@ Rails.application.routes.draw do
   post 'inner_api/shoot'
   post 'inner_api/push_repository'
 
-  get "/id/:id" => "home#home"
-
-  get '/edit' => "edit#edit"
-
-  post 'make_session' => "site_session#make"
-
-  post 'delete_session' => "site_session#delete"
-
   post "/home/add_site"
   post "/home/change_site"
 
   root "home#home"
+  get "/id/:id" => "home#home"
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
