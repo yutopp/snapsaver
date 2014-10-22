@@ -10,6 +10,9 @@ Rails.application.routes.draw do
   post "/home/change_site"
 
   root "home#home"
+  get "/latest_images" => "latest_images#latest_images"
+
+  get "/id/:id/latest_images" => "latest_images#latest_images"
   get "/id/:id" => "home#home"
 
   # The priority is based upon order of creation: first created -> highest priority.

@@ -1,0 +1,5 @@
+<h1><%= @site_name %></h1>
+<% for latest_image in @latest_images %>
+    <h2><%= latest_image[:url] %></h2>
+    <img src="<%= latest_image[:url_to_image] %>"/>
+<% end %>

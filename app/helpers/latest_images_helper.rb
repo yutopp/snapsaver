@@ -1,0 +1,2 @@
+module LatestImagesHelper
+end
