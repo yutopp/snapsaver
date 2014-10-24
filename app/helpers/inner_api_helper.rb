@@ -40,7 +40,7 @@ module InnerApiHelper
     end
 
     def set_width(width)
-      @driver.manage.window.resize_to width, 0
+      @driver.manage.window.resize_to width, 1024
     end
 
     def shoot(url, breakpoint)
