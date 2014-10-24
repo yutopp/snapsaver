@@ -1,5 +1,8 @@
 require "git"
 
+# FIXME: BREAKPOINTSのために別のコントローラのヘルパーを使ってる
+include HomeHelper
+
 class LatestImagesController < ApplicationController
   def latest_images
     id = params[:id]
@@ -29,9 +32,12 @@ class LatestImagesController < ApplicationController
 
     
     @latest_images = urls.split("\n").map{ |url|
-      {
-        url: url,
-        url_to_image: "https://bytebucket.org/snapsaver/#{repository_name}/raw/#{head_sha}/#{url.gsub "/", "_"}.png"
+      BREAKPOINTS.map{ |breakpoint|
+        {
+          breakpoint: breakpoint,
+          url: url,
+          url_to_image: "https://bytebucket.org/snapsaver/#{repository_name}/raw/#{head_sha}/#{url.gsub "/", "_"}.#{breakpoint}.png"
+        }
       }
     }
 

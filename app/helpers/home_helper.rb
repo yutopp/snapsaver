@@ -3,6 +3,8 @@ module HomeHelper
   class BitbucketAPIException < Exception
   end
 
+  BREAKPOINTS = ["lg", "md", "sm", "xs"]
+
   def create_bitbucket_repository(name)
     user = ENV["BITBUCKET_USER"]
     pass = ENV["BITBUCKET_PASSWORD"]

@@ -27,7 +27,7 @@ angular.module('app', []).controller 'ctrl', ['$scope', '$http', ($scope, $http)
     if index == 0
       pushLog {isURL: false, isError: false, item: "撮り始めます"}
 
-    $.post '/inner_api/shoot', {index: index, id: $scope.id}
+    $.post '/inner_api/shoot', {index: index, id: $scope.id, breakpoint: $scope.breakpointSelected}
       .done (data) ->
         $scope.$apply () ->
           pushLog {isURL: false, isError: false, item: "(" + (index + 1) + "/" + ($scope.urlsSize + 1) + ")完了: " + data.url}

@@ -24,6 +24,8 @@ module InnerApiHelper
     end
   end
 
+  BREKPONT_TO_WIDTH = {"lg" => 1210, "md" => 1002, "sm" => 778, "xs" => 758}
+
   class ScreenShooter
     def initialize
       Selenium::WebDriver::Firefox.path = "vendor/firefox/firefox"
@@ -37,7 +39,11 @@ module InnerApiHelper
       @driver = Selenium::WebDriver.for :firefox, profile: profile
     end
 
-    def shoot(url)
+    def set_width(width)
+      @driver.manage.window.resize_to width, 0
+    end
+
+    def shoot(url, breakpoint)
       @driver.navigate.to url
 
       @driver.execute_script <<-"JavaScript"
@@ -47,7 +53,7 @@ module InnerApiHelper
         }
       JavaScript
 
-      @driver.save_screenshot("#{url.gsub("/", "_")}.png")
+      @driver.save_screenshot("#{url.gsub("/", "_")}.#{breakpoint}.png")
     end
 
     def close

@@ -2,6 +2,9 @@ require "securerandom"
 
 include InnerApiHelper
 
+# FIXME: BREAKPOINTSのために他のコントローラのヘルパーを使ってる
+include HomeHelper
+
 class InnerApiController < ApplicationController
   @@screen_shooters = {}
 
@@ -92,11 +95,22 @@ class InnerApiController < ApplicationController
 
       if index == 0
         @@screen_shooters[session_id] = ScreenShooter.new
+
+        if params[:breakpoint] != "all"
+          @@screen_shooters[session_id].set_width BREKPONT_TO_WIDTH[params[:breakpoint]]
+        end
       end
 
       Dir.chdir("repo/#{site_name}") do
         begin
-          @@screen_shooters[session_id].shoot urls[index]
+          if params[:breakpoint] == "all"
+            for breakpoint in BREAKPOINTS
+              @@screen_shooters[session_id].set_width BREKPONT_TO_WIDTH[breakpoint]
+              @@screen_shooters[session_id].shoot urls[index], breakpoint
+            end
+          else
+            @@screen_shooters[session_id].shoot urls[index], params[:breakpoint]
+          end
         rescue => e
           p e
           puts e.backtrace.join("\n")

@@ -49,6 +49,8 @@ class HomeController < ApplicationController
       @urls = site.urls
       @urls_size = @urls.count("\n") + 1
     end
+
+    @breakpoints = BREAKPOINTS
   end
 
   def add_site
