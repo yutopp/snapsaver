@@ -17,5 +17,10 @@
 
 .env
 !.env.template
+
+id_rsa.snapsaver
+!id_rsa.snapsaver.template
+
 repo/*
 vendor/firefox/*
+.vagrant/*

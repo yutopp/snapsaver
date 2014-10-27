@@ -1,10 +1,16 @@
 <div ng-app="app">
     <div ng-controller="ctrl">
         <div ng-init="urlsSize = <%= @urls_size %>"></div>
-        <div ng-init="sites = <%= @sites.to_s %>; siteSelected = '<%= @site %>'"></div>
-        <div ng-init="id = '<%= @id %>'"></div>
         <div ng-init="breakpoints = <%= @breakpoints.to_s %>.concat('all')"</div>
         <div ng-init="breakpointSelected = 'lg'"></div>
+
+        <% if user_signed_in? %>
+            <div ng-init="sites = <%= @sites.to_s %>; siteSelected = '<%= @site %>'"></div>
+        <% end %>
+
+        <% if @id %>
+            <div ng-init="id = '<%= @id %>'"></div>
+        <% end %>
 
         <div style="height: 100%; margin: 0px">
             <div style="top: 0px; height: 100%; width: 50%; box-sizing: border-box;">
