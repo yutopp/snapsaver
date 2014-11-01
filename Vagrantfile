@@ -98,6 +98,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     cp vagrant.ssh.config ~/.ssh/config
     cp id_rsa.snapsaver ~/.ssh
+    chmod 600 ~/.ssh/id_rsa.snapsaver
   EOS
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
