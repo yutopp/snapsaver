@@ -86,7 +86,6 @@ GEM
       railties (= 4.1.6)
       sprockets-rails (~> 2.0)
     rails-assets-angular (1.2.26)
-    rails-assets-lightbox2 (2.7.1)
     railties (4.1.6)
       actionpack (= 4.1.6)
       activesupport (= 4.1.6)
@@ -150,7 +149,6 @@ DEPENDENCIES
   jquery-rails
   rails (= 4.1.6)
   rails-assets-angular
-  rails-assets-lightbox2
   sass-rails (~> 4.0.3)
   sdoc (~> 0.4.0)
   selenium-webdriver
