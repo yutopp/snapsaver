@@ -73,7 +73,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
   config.vm.provision :shell, inline: <<-EOS
-    apt-get install -y git ruby-dev nodejs libsqlite3-dev libssl-dev xvfb tmux
+    apt-get install -y git ruby-dev nodejs libsqlite3-dev libssl-dev libreadline6-dev xvfb tmux
     apt-get install -y libasound2 libgtk2.0-0 fonts-takao-gothic
   EOS
 
