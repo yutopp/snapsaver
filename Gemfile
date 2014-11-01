@@ -46,3 +46,4 @@ gem "headless"
 gem "devise"
 
 gem "rails-assets-angular"
+gem "rails-assets-lightbox2"

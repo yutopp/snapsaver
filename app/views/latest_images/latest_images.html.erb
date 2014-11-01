@@ -2,6 +2,8 @@
 <% for same_url_latest_images in @latest_images %>
     <% for latest_image in same_url_latest_images %>
         <h2>[<%= latest_image[:breakpoint] %>] <%= latest_image[:url] %></h2>
-        <img src="<%= latest_image[:url_to_image] %>"/>
+        <a href="<%= latest_image[:url_to_image] %>", data-lightbox="<%= latest_image[:url_to_image] %>">
+            <img src="<%= latest_image[:url_to_image] %>", height="200px">
+        </a>
     <% end %>
 <% end %>
