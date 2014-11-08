@@ -2,6 +2,8 @@
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 
+percentize = (numerator, denominator) -> Math.floor(100 * numerator / denominator + 0.5)
+
 angular.module('app', []).controller 'ctrl', ['$scope', '$http', ($scope, $http) ->
   $scope.commit_message = ''
   $scope.logs = []
@@ -26,19 +28,19 @@ angular.module('app', []).controller 'ctrl', ['$scope', '$http', ($scope, $http)
 
   $scope.shoot = (index) ->
     if index == 0
-      pushLog {isURL: false, isError: false, item: "撮り始めます"}
+      pushLog {isURL: false, isError: false, item: "[0%]撮り始めます"}
       $scope.shootingSnapshot = true
 
     $.post '/inner_api/shoot', {index: index, id: $scope.id, breakpoint: $scope.breakpointSelected}
       .done (data) ->
         $scope.$apply () ->
-          pushLog {isURL: false, isError: false, item: "(" + (index + 1) + "/" + ($scope.urlsSize + 1) + ")完了: " + data.url}
+          pushLog {isURL: false, isError: false, item: "[#{percentize(index + 1, $scope.urlsSize + 1)}%]完了: " + data.url}
 
         if data.last
           $.post '/inner_api/push_repository', {commit_message: $scope.commit_message, id: $scope.id}
             .done (data) ->
               $scope.$apply () ->
-                pushLog {isURL: false, isError: false, item: "(" + ($scope.urlsSize + 1) + "/" + ($scope.urlsSize + 1) + ")push完了"}
+                pushLog {isURL: false, isError: false, item: "[100%]push完了"}
                 pushLog {isURL: true, isError: false, item: data.url}
             .fail (data) ->
               $scope.$apply () ->
