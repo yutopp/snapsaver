@@ -27,12 +27,12 @@
             <div>
                 <textarea ng-model="urls" ng-init="urls = '<%= @urls %>'" placeholder="URLリスト"></textarea>
                 <% if user_signed_in? || @id %>
-                    <button ng-click="save();">リスト保存</button>
+                    <button ng-click="save();">URLリスト保存</button>
                 <% else %>
                     <form action="/inner_api/make_id" method="post" >
                         <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
                         <input type="hidden" name="urls" ng-value="urls"></input>
-                        <input type="submit" value="リスト保存"></input>
+                        <input type="submit" value="URLリスト保存"></input>
                     </form>
                 <% end %>
             </div>
@@ -51,12 +51,12 @@
                     <form action="/home/change_site" method="post">
                         <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
                         <select name="site" ng-model="siteSelected" ng-options="site for site in sites track by site"></select>
-                        <input type="submit" value="サイト変更"/>
+                        <input type="submit" value="URLリストを変更"/>
                     </form>
                     <form action="/home/add_site" method="post">
                         <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
                         <input type="text"   name="site"/>
-                        <input type="submit" value="サイト追加"/>
+                        <input type="submit" value="URLリストを追加"/>
                     </form>
                     <p><%= link_to "ログアウト", destroy_user_session_path, method: :delete %></p>
                 <% else %>
