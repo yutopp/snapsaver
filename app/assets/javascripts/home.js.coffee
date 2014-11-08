@@ -5,6 +5,7 @@
 angular.module('app', []).controller 'ctrl', ['$scope', '$http', ($scope, $http) ->
   $scope.commit_message = ''
   $scope.logs = []
+  $scope.shootingSnapshot = false
 
   pushLog = (log) ->
     log.time = new Date().toLocaleTimeString()
@@ -26,6 +27,7 @@ angular.module('app', []).controller 'ctrl', ['$scope', '$http', ($scope, $http)
   $scope.shoot = (index) ->
     if index == 0
       pushLog {isURL: false, isError: false, item: "撮り始めます"}
+      $scope.shootingSnapshot = true
 
     $.post '/inner_api/shoot', {index: index, id: $scope.id, breakpoint: $scope.breakpointSelected}
       .done (data) ->
@@ -46,4 +48,6 @@ angular.module('app', []).controller 'ctrl', ['$scope', '$http', ($scope, $http)
       .fail (data) ->
         $scope.$apply () ->
           pushLog {isURL: false, isError: true, item: data.responseJSON.error}
+      .always () ->
+        $scope.shootingSnapshot = false
 ]

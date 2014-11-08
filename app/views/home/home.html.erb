@@ -42,7 +42,7 @@
                     <textarea ng-model="commit_message" placeholder="コミットメッセージ"></textarea>
                     <span>ブレークポイント：</span>
                     <select ng-model="breakpointSelected" ng-options="breakpoint for breakpoint in breakpoints"></select>
-                    <button ng-click="shoot(0);">スナップショットを取る</button>
+                    <button ng-disabled="shootingSnapshot" ng-click="shoot(0);">スナップショットを取る</button>
                 </div>
             <% end %>
 
