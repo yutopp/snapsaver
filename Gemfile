@@ -48,3 +48,6 @@ gem "test-unit-rails", group: [:development, :test]
 gem 'factory_girl_rails', group: [:development, :test]
 
 gem "rails-assets-angular"
+gem 'rails-assets-bootstrap'
+
+gem 'devise-bootstrap-views'

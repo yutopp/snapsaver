@@ -1,0 +1,57 @@
+$navbar-height: 50px;
+$grid-gutter-width: 30px;
+
+@import "bootstrap";
+
+body {
+    padding-top: 70px;
+}
+
+.main-menu {
+    @extend .col-sm-6;
+}
+
+@media (min-width: 768px) {
+    .main-menu {
+        position: fixed;
+        top: $navbar-height;
+        margin: 0;
+        padding-top: $grid-gutter-width;
+        padding-left: ($grid-gutter-width/2);
+        width: 50%;
+
+        z-index: 1000;
+        display: block;
+        overflow-x: hidden;
+    }
+
+    .log-area {
+        @extend .col-sm-6;
+        @extend .col-sm-offset-6;
+    }
+}
+
+.url-list-box {
+    width: 100%;
+
+    button, textarea, input {
+        width: 100%;
+    }
+
+    margin-bottom: 6px;
+}
+
+.taking-snap-shot {
+    width: 100%;
+
+    button, textarea {
+        width: 100%;
+    }
+
+    div {
+        margin-top: 4px;
+        margin-bottom: 4px;
+    }
+
+    margin-bottom: 6px;
+}
