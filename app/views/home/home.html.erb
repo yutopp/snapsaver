@@ -83,13 +83,10 @@
 
         <div class="log-area">
             <div class="well well-sm">
-                <div ng-repeat="log in logns">
+                <div ng-repeat="log in logs">
                     <a    ng-if=" log.isURL" ng-style="log.isError ? {color: 'red'} : {}" href="{{log.item}}">[{{log.time}}] {{log.item}}</a>
                     <span ng-if="!log.isURL" ng-style="log.isError ? {color: 'red'} : {}"                    >[{{log.time}}] {{log.item}}</span>
                 </div>
-
-            <p>yo</p>
-            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>            <p>yo</p>
             </div>
         </div>
     </div>
