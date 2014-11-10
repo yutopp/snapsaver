@@ -44,5 +44,7 @@ gem 'git'
 gem 'selenium-webdriver'
 gem "headless"
 gem "devise"
+gem "test-unit-rails", group: [:development, :test]
+gem 'factory_girl_rails', group: [:development, :test]
 
 gem "rails-assets-angular"
