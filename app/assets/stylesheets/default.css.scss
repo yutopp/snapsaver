@@ -3,6 +3,13 @@ $grid-gutter-width: 30px;
 
 @import "bootstrap";
 
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
 body {
     padding-top: 70px;
 }
@@ -13,6 +20,15 @@ body {
 
 .log-area {
     @extend .col-sm-6;
+}
+
+@media (max-width: 767px) {
+    .log-area {
+        .well {
+            height: 100px;
+            overflow-y: scroll;
+        }
+    }
 }
 
 @media (min-width: 768px) {
@@ -30,7 +46,6 @@ body {
     }
 
     .log-area {
-        @extend .col-sm-6;
         @extend .col-sm-offset-6;
     }
 }

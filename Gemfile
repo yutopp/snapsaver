@@ -51,3 +51,4 @@ gem "rails-assets-angular"
 gem 'rails-assets-bootstrap'
 
 gem 'devise-bootstrap-views'
+gem 'rails-assets-angularjs-scroll-glue'

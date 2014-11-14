@@ -1,5 +1,5 @@
-<div ng-app="app">
-    <div ng-controller="ctrl" class="row">
+<div>
+    <div class="row">
         <div class="main-menu">
             <div class="row">
                 <div class="col-sm-12">
@@ -82,7 +82,7 @@
         </div>
 
         <div class="log-area">
-            <div class="well well-sm">
+            <div class="well well-sm" scroll-glue="glued">
                 <div ng-repeat="log in logs">
                     <a    ng-if=" log.isURL" ng-style="log.isError ? {color: 'red'} : {}" href="{{log.item}}">[{{log.time}}] {{log.item}}</a>
                     <span ng-if="!log.isURL" ng-style="log.isError ? {color: 'red'} : {}"                    >[{{log.time}}] {{log.item}}</span>

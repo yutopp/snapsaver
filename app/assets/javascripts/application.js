@@ -15,4 +15,5 @@
 //= require turbolinks
 //= require bootstrap
 //= require angular
+//= require angularjs-scroll-glue
 //= require_tree .

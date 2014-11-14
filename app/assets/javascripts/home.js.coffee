@@ -4,7 +4,7 @@
 
 percentize = (numerator, denominator) -> Math.floor(100 * numerator / denominator + 0.5)
 
-angular.module('app', []).controller 'ctrl', ['$scope', '$http', ($scope, $http) ->
+angular.module('app', ['luegg.directives']).controller 'ctrl', ['$scope', '$http', ($scope, $http) ->
   $scope.commit_message = ''
   $scope.logs = []
   $scope.shootingSnapshot = false
