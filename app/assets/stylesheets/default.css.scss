@@ -11,6 +11,10 @@ body {
     @extend .col-sm-6;
 }
 
+.log-area {
+    @extend .col-sm-6;
+}
+
 @media (min-width: 768px) {
     .main-menu {
         position: fixed;
