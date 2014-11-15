@@ -15,11 +15,28 @@ module InnerApiHelper
     sock = Net::HTTP.new("api.bitbucket.org", 443)
     sock.use_ssl = true
     sock.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    sock.set_debug_output $stderr
 
     sock.start do |http|
       response = http.request(req)
       raise BitbucketAPIException.new if response.code != '200'
+      response.body
+    end
+  end
+
+  def delete_bitbucket_repository(name)
+    user = ENV["BITBUCKET_USER"]
+    pass = ENV["BITBUCKET_PASSWORD"]
+
+    req = Net::HTTP::Delete.new("/2.0/repositories/snapsaver/#{name}")
+    req.basic_auth(user, pass)
+
+    sock = Net::HTTP.new("api.bitbucket.org", 443)
+    sock.use_ssl = true
+    sock.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    sock.start do |http|
+      response = http.request(req)
+      raise BitbucketAPIException.new if response.code != '204'
       response.body
     end
   end
