@@ -1,71 +1,87 @@
-<div ng-app="app">
-    <div ng-controller="ctrl">
-        <div ng-init="urlsSize = <%= @urls_size %>"></div>
-        <div ng-init="breakpoints = <%= @breakpoints.to_s %>.concat('all')"</div>
-        <div ng-init="breakpointSelected = 'lg'"></div>
+<div class="row">
+    <div class="main-menu">
+        <div class="row">
+            <div class="col-sm-12">
+                <div ng-init="urlsSize = <%= @urls_size %>"></div>
+                <div ng-init="breakpoints = <%= @breakpoints.to_s %>.concat('all')"></div>
+                <div ng-init="breakpointSelected = 'lg'"></div>
 
-        <% if user_signed_in? %>
-            <div ng-init="sites = <%= @sites.to_s %>; siteSelected = '<%= @site %>'"></div>
-        <% end %>
-
-        <% if @id %>
-            <div ng-init="id = '<%= @id %>'"></div>
-        <% end %>
-
-        <div style="height: 100%; margin: 0px">
-            <div style="top: 0px; height: 100%; width: 50%; box-sizing: border-box;">
                 <% if user_signed_in? %>
-                    <h1 style="margin-top: 0px"><%= @site %></h1>
-                    <p><a href="https://bitbucket.org/snapsaver/<%= @uuid %>-<%= @site %>/commits/all">https://bitbucket.org/snapsaver/<%= @uuid %>-<%= @site %>/commits/all</a></p>
-                    <p><a href="/latest_images">最新のスナップショット</a></p>
-                <% elsif @id %>
-                    <p><a href="https://bitbucket.org/snapsaver/<%= @id %>/commits/all">https://bitbucket.org/snapsaver/<%= @id %>/commits/all</a></p>
-                    <p><a href="/id/<%= @id %>/latest_images">最新のスナップショット</a></p>
+                    <div ng-init="sites = <%= @sites.to_s %>; siteSelected = '<%= @site %>'"></div>
                 <% end %>
-            </div>
 
-            <div>
-                <textarea ng-model="urls" ng-init="urls = '<%= @urls %>'" placeholder="URLリスト"></textarea>
-                <% if user_signed_in? || @id %>
-                    <button ng-click="save();">URLリスト保存</button>
-                <% else %>
-                    <form action="/inner_api/make_id" method="post" >
-                        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
-                        <input type="hidden" name="urls" ng-value="urls"></input>
-                        <input type="submit" value="URLリスト保存"></input>
-                    </form>
+                <% if @id %>
+                    <div ng-init="id = '<%= @id %>'"></div>
                 <% end %>
-            </div>
 
-            <% if user_signed_in? || @id %>
-                <div>
-                    <textarea ng-model="commit_message" placeholder="コミットメッセージ"></textarea>
-                    <span>ブレークポイント：</span>
-                    <select ng-model="breakpointSelected" ng-options="breakpoint for breakpoint in breakpoints"></select>
-                    <button ng-disabled="shootingSnapshot" ng-click="shoot(0);">スナップショットを取る</button>
+                <div style="height: 100%; margin: 0px">
+                    <div style="top: 0px; height: 100%; width: 50%; box-sizing: border-box;">
+                        <% if user_signed_in? %>
+                            <h1 style="margin-top: 0px"><%= @site %></h1>
+                            <p><a href="https://bitbucket.org/snapsaver/<%= @uuid %>-<%= @site %>/commits/all">https://bitbucket.org/snapsaver/<%= @uuid %>-<%= @site %>/commits/all</a></p>
+                            <p><a href="/latest_images">最新のスナップショット</a></p>
+                        <% elsif @id %>
+                            <p><a href="https://bitbucket.org/snapsaver/<%= @id %>/commits/all">https://bitbucket.org/snapsaver/<%= @id %>/commits/all</a></p>
+                            <p><a href="/id/<%= @id %>/latest_images">最新のスナップショット</a></p>
+                        <% end %>
+                    </div>
+
+                    <div class="url-list-box">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <textarea ng-model="urls" ng-init="urls = '<%= @urls %>'" placeholder="URLリスト"></textarea>
+                            </div>
+                            <div class="col-sm-4">
+                                <% if user_signed_in? || @id %>
+                                    <button ng-click="save();" class="btn btn-primary">URLリスト保存</button>
+                                <% else %>
+                                    <form action="/inner_api/make_id" method="post" >
+                                        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+                                        <input type="hidden" name="urls" ng-value="urls">
+                                        <input type="submit" value="URLリスト保存" class="btn btn-primary">
+                                    </form>
+                                <% end %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <% if user_signed_in? || @id %>
+                        <div class="well well-sm taking-snap-shot">
+                            <textarea ng-model="commit_message" placeholder="コミットメッセージ"></textarea><br>
+                            <div>
+                                <span>ブレークポイント：</span>
+                                <select ng-model="breakpointSelected" ng-options="breakpoint for breakpoint in breakpoints"></select>
+                            </div>
+                            <button ng-disabled="shootingSnapshot" ng-click="shoot(0);" class="btn btn-success">
+                                <strong>スナップショットを取る</strong>
+                            </button>
+                        </div>
+                    <% end %>
+
+                    <div>
+                        <% if user_signed_in? %>
+                            <form action="/home/change_site" method="post">
+                                <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
+                                <select name="site" ng-model="siteSelected" ng-options="site for site in sites track by site"></select>
+                                <input type="submit" value="URLリストを変更"/>
+                            </form>
+                            <form action="/home/add_site" method="post">
+                                <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
+                                <input type="text"   name="site"/>
+                                <input type="submit" value="URLリストを追加"/>
+                            </form>
+                            <p><%= link_to "ログアウト", destroy_user_session_path, method: :delete %></p>
+                        <% else %>
+                            <p><%= link_to "ログイン", new_user_session_path %></p>
+                        <% end %>
+                    </div>
                 </div>
-            <% end %>
-
-            <div>
-                <% if user_signed_in? %>
-                    <form action="/home/change_site" method="post">
-                        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
-                        <select name="site" ng-model="siteSelected" ng-options="site for site in sites track by site"></select>
-                        <input type="submit" value="URLリストを変更"/>
-                    </form>
-                    <form action="/home/add_site" method="post">
-                        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
-                        <input type="text"   name="site"/>
-                        <input type="submit" value="URLリストを追加"/>
-                    </form>
-                    <p><%= link_to "ログアウト", destroy_user_session_path, method: :delete %></p>
-                <% else %>
-                    <p><%= link_to "ログイン", new_user_session_path %></p>
-                <% end %>
             </div>
         </div>
+    </div>
 
-        <div style="border: solid 0.2rem #000; position: absolute; left: 50%; top: 0px; width: 50%; height: 100%; overflow: auto; box-sizing: border-box">
+    <div class="log-area">
+        <div class="well well-sm" scroll-glue="glued">
             <div ng-repeat="log in logs">
                 <a    ng-if=" log.isURL" ng-style="log.isError ? {color: 'red'} : {}" href="{{log.item}}">[{{log.time}}] {{log.item}}</a>
                 <span ng-if="!log.isURL" ng-style="log.isError ? {color: 'red'} : {}"                    >[{{log.time}}] {{log.item}}</span>
