@@ -9,6 +9,14 @@ class InnerApiController < ApplicationController
   @@screen_shooters = {}
 
   def make_id
+    if user_signed_in?
+      p :signed_in
+      render status: 400, json: {error: "invalid session"}
+      return
+    else
+      p :not_signed_in
+    end
+
     id = SecureRandom.uuid
 
     create_bitbucket_repository id
@@ -17,7 +25,7 @@ class InnerApiController < ApplicationController
     repo.config "user.name", ENV["BITBUCKET_USER"]
     repo.config "user.email", ENV["BITBUCKET_USER"]
 
-    Site.create name: id, urls: params[:urls]
+    UrlList.create name: id, urls: params[:urls]
     redirect_to "/id/#{id}"
   end
 
@@ -41,7 +49,7 @@ class InnerApiController < ApplicationController
       site.urls = valid_urls_str
       site.save
     else
-      site = Site.find_by name: params[:id]
+      site = UrlList.find_by name: params[:id]
       site.urls = valid_urls_str
       site.save
     end
@@ -55,7 +63,7 @@ class InnerApiController < ApplicationController
   def shoot
     begin
       if user_signed_in?
-        site_name = user_session["current_site_name"]
+        site_name = user_session["current_url_list_name"]
       else
         site_name = params[:id]
       end
@@ -70,7 +78,7 @@ class InnerApiController < ApplicationController
         # FIXME: 非常にアレな実装。repository_nameとかを使うべき
         site_name = current_user.uuid + "-" + site_name
       else
-        site = Site.find_by name: site_name
+        site = UrlList.find_by name: site_name
       end
 
       if site.nil?
@@ -86,7 +94,7 @@ class InnerApiController < ApplicationController
       index = params[:index].to_i
       urls = site.urls.split "\n"
 
-      if urls.size <= index
+      if index < 0 || urls.size <= index
         render status: 400, json: {error: "index out of range"}
         return
       end
@@ -155,7 +163,7 @@ class InnerApiController < ApplicationController
         site = current_user.sites.find_by name: site_name
         site_name = current_user.uuid + "-" + site_name
       else
-        site = Site.find_by name: site_name
+        site = UrlList.find_by name: site_name
       end
 
       if site.nil?
@@ -166,7 +174,12 @@ class InnerApiController < ApplicationController
       commit_message = params[:commit_message].strip
 
       repo = Git.open("repo/#{site_name}")
-      repo.add(:all => true)
+      repo.add(all: true)
+
+      if not File.exist? repo.index.to_s
+        render status: 400, json: {error: "no changes in URLs"}
+        return
+      end
 
       if repo.branches.size == 0 || repo.diff("HEAD", "--").size > 0
         if commit_message.empty?
