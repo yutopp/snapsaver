@@ -9,12 +9,11 @@ class InnerApiController < ApplicationController
   @@screen_shooters = {}
 
   def make_id
+    p "{#{current_user}}"
+    p "{#{user_signed_in?}}"
     if user_signed_in?
-      p :signed_in
       render status: 400, json: {error: "invalid session"}
       return
-    else
-      p :not_signed_in
     end
 
     id = SecureRandom.uuid
@@ -39,6 +38,14 @@ class InnerApiController < ApplicationController
       end
     end
 
+    if params[:list_name]
+      list_name = params[:list_name]
+    else
+      render status: 400, json: {error: "invalid session"}
+      return
+    end
+
+
     urls = params[:urls].split("\n").map{ |url| url.strip }
     valid_urls =   urls.select{ |url| URI.parse(url).kind_of?(URI::HTTP) rescue false }
     invalid_urls = urls.reject{ |url| URI.parse(url).kind_of?(URI::HTTP) rescue false }
@@ -49,7 +56,7 @@ class InnerApiController < ApplicationController
       site.urls = valid_urls_str
       site.save
     else
-      site = UrlList.find_by name: params[:id]
+      site = UrlList.find_by name: list_name
       site.urls = valid_urls_str
       site.save
     end
@@ -65,7 +72,7 @@ class InnerApiController < ApplicationController
       if user_signed_in?
         site_name = user_session["current_url_list_name"]
       else
-        site_name = params[:id]
+        site_name = params[:list_name]
       end
 
       if site_name.nil?
@@ -151,7 +158,7 @@ class InnerApiController < ApplicationController
       if user_signed_in?
         site_name = user_session["current_site_name"]
       else
-        site_name = params[:id]
+        site_name = params[:list_name]
       end
 
       if site_name.nil?
