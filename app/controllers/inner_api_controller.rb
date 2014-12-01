@@ -56,6 +56,77 @@ class InnerApiController < ApplicationController
   end
 
   def shoot
+    url_list_name = params[:list_name]
+
+    if url_list_name.nil?
+      render status: 400, json: {error: "URL list not specified"}
+      return
+    end
+
+    if user_signed_in?
+      url_list = current_user.url_lists.find_by name: url_list_name
+      repository_name = current_user.uuid + "-" + url_list_name
+    else
+      url_list = UrlList.find_by name: url_list_name
+      repository_name = url_list_name
+    end
+
+    if url_list.nil?
+      render status: 400, json: {error: "URL list not found"}
+      return
+    end
+
+    if url_list.urls.empty?
+      render status: 400, json: {error: "empty URL list"}
+      return
+    end
+
+    index = params[:index].to_i
+    urls = url_list.urls.split "\n"
+
+    if index < 0 || urls.size <= index
+      render status: 400, json: {error: "index out of range"}
+      return
+    end
+
+    session_id = request.session_options[:id]
+
+    if index == 0
+      @@screen_shooters[session_id] = ScreenShooter.new
+    end
+
+    Dir.chdir("repo/#{repository_name}") do
+      begin
+        if params[:breakpoint] == "all"
+          for breakpoint in BREAKPOINTS
+            @@screen_shooters[session_id].set_width BREKPONT_TO_WIDTH[breakpoint]
+            @@screen_shooters[session_id].shoot urls[index], breakpoint
+          end
+        else
+          @@screen_shooters[session_id].set_width BREKPONT_TO_WIDTH[params[:breakpoint]]
+          @@screen_shooters[session_id].shoot urls[index], params[:breakpoint]
+        end
+      rescue => e
+        p e
+        puts e.backtrace.join("\n")
+
+        @@screen_shooters[session_id].close
+        @@screen_shooters.delete session_id
+
+        render status: 500, json: {error: "internal server error: #{urls[index]}"}
+        return
+      end
+    end
+
+    if index + 1 == urls.size
+      @@screen_shooters[session_id].close
+      @@screen_shooters.delete session_id
+    end
+
+    render json: {url: urls[index], last: index + 1 == urls.size}
+  end
+
+  def push_repository
     begin
       url_list_name = params[:list_name]
 
@@ -77,87 +148,9 @@ class InnerApiController < ApplicationController
         return
       end
 
-      if url_list.urls.empty?
-        render status: 400, json: {error: "empty URL list"}
-        return
-      end
-
-      index = params[:index].to_i
-      urls = site.urls.split "\n"
-
-      if index < 0 || urls.size <= index
-        render status: 400, json: {error: "index out of range"}
-        return
-      end
-
-      session_id = request.session_options[:id]
-
-      if index == 0
-        @@screen_shooters[session_id] = ScreenShooter.new
-      end
-
-      Dir.chdir("repo/#{repository_name}") do
-        begin
-          if params[:breakpoint] == "all"
-            for breakpoint in BREAKPOINTS
-              @@screen_shooters[session_id].set_width BREKPONT_TO_WIDTH[breakpoint]
-              @@screen_shooters[session_id].shoot urls[index], breakpoint
-            end
-          else
-            @@screen_shooters[session_id].set_width BREKPONT_TO_WIDTH[params[:breakpoint]]
-            @@screen_shooters[session_id].shoot urls[index], params[:breakpoint]
-          end
-        rescue => e
-          p e
-          puts e.backtrace.join("\n")
-
-          @@screen_shooters[session_id].close
-          @@screen_shooters.delete session_id
-
-          render status: 400, json: {error: "invalid URL: #{urls[index]}"}
-          return
-        end
-      end
-
-      if index + 1 == urls.size
-        @@screen_shooters[session_id].close
-        @@screen_shooters.delete session_id
-      end
-
-      render json: {url: urls[index], last: index + 1 == urls.size}
-      return
-    rescue => e
-      p e
-      puts e.backtrace.join("\n")
-      render status: 500, json: {error: "internal server error"}
-      return
-    end
-  end
-
-  def push_repository
-    begin
-      site_name = params[:list_name]
-
-      if site_name.nil?
-        render status: 400, json: {error: "URL list not specified"}
-        return
-      end
-
-      if user_signed_in?
-        site = current_user.url_lists.find_by name: site_name
-        site_name = current_user.uuid + "-" + site_name
-      else
-        site = UrlList.find_by name: site_name
-      end
-
-      if site.nil?
-        render status: 400, json: {error: "URL list not found"}
-        return
-      end
-
       commit_message = params[:commit_message].strip
 
-      repo = Git.open("repo/#{site_name}")
+      repo = Git.open("repo/#{repository_name}")
       repo.add(all: true)
 
       if not File.exist? repo.index.to_s
@@ -173,7 +166,7 @@ class InnerApiController < ApplicationController
         end
         repo.push
 
-        render json: {url: "https://bitbucket.org/#{ENV["BITBUCKET_USER"]}/#{site_name}/commits/#{repo.gcommit("HEAD").sha}"}
+        render json: {url: "https://bitbucket.org/#{ENV["BITBUCKET_USER"]}/#{repository_name}/commits/#{repo.gcommit("HEAD").sha}"}
         return
       else
         render status: 400, json: {error: "no changes in URLs"}

@@ -12,8 +12,8 @@ Rails.application.routes.draw do
   root "home#home"
   get "/latest_images" => "latest_images#latest_images"
 
-  get "/id/:id/latest_images" => "latest_images#latest_images"
-  get "/id/:id" => "home#home"
+  get "/orphan/:url_list/latest_images" => "latest_images#latest_images"
+  get "/orphan/:url_list" => "home#home"
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

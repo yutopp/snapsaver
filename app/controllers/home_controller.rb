@@ -5,7 +5,7 @@ require "securerandom"
 class HomeController < ApplicationController
   def home
     if user_signed_in?
-      sites = current_user.sites
+      sites = current_user.url_lists
 
       if sites.empty?
         begin
