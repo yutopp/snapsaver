@@ -9,91 +9,75 @@ class InnerApiController < ApplicationController
   @@screen_shooters = {}
 
   def make_id
-    p "{#{current_user}}"
-    p "{#{user_signed_in?}}"
     if user_signed_in?
-      render status: 400, json: {error: "invalid session"}
+      render status: 400, json: {error: "should not log in"}
       return
     end
 
-    id = SecureRandom.uuid
+    url_list_name = SecureRandom.uuid
 
-    create_bitbucket_repository id
+    create_bitbucket_repository url_list_name
 
-    repo = Git.clone "git@bitbucket.org:#{ENV["BITBUCKET_USER"]}/#{id}.git", "repo/#{id}"
+    repo = Git.clone "git@bitbucket.org:#{ENV["BITBUCKET_USER"]}/#{url_list_name}.git", "repo/#{url_list_name}"
     repo.config "user.name", ENV["BITBUCKET_USER"]
     repo.config "user.email", ENV["BITBUCKET_USER"]
 
-    UrlList.create name: id, urls: params[:urls]
-    redirect_to "/id/#{id}"
+    UrlList.create name: url_list_name, urls: params[:urls]
+    redirect_to "/id/#{url_list_name}"
   end
 
   def save_urls
-    if user_signed_in?
-      current_site_name = user_session["current_site_name"]
-
-      if current_site_name.nil?
-        render json: {error: "invalid session"}
-        return
-      end
-    end
-
     if params[:list_name]
-      list_name = params[:list_name]
+      url_list_name = params[:list_name]
     else
-      render status: 400, json: {error: "invalid session"}
+      render status: 400, json: {error: "URL list not specified"}
       return
     end
-
 
     urls = params[:urls].split("\n").map{ |url| url.strip }
     valid_urls =   urls.select{ |url| URI.parse(url).kind_of?(URI::HTTP) rescue false }
     invalid_urls = urls.reject{ |url| URI.parse(url).kind_of?(URI::HTTP) rescue false }
-    valid_urls_str = valid_urls.join "\n"
+    valid_urls_joined = valid_urls.join "\n"
 
     if user_signed_in?
-      site = current_user.sites.find_by name: current_site_name
-      site.urls = valid_urls_str
-      site.save
+      url_list = current_user.url_lists.find_by name: url_list_name
+      url_list.urls = valid_urls_joined
+      url_list.save
     else
-      site = UrlList.find_by name: list_name
-      site.urls = valid_urls_str
-      site.save
+      url_list = UrlList.find_by name: url_list_name
+      url_list.urls = valid_urls_joined
+      url_list.save
     end
 
     render json: {message: "URLリストを保存しました",
-                  urls: valid_urls_str,
+                  urls: valid_urls_joined,
                   urls_size: valid_urls.size,
                   invalid_urls: invalid_urls}
   end
 
   def shoot
     begin
-      if user_signed_in?
-        site_name = user_session["current_url_list_name"]
-      else
-        site_name = params[:list_name]
-      end
+      url_list_name = params[:list_name]
 
-      if site_name.nil?
-        render status: 400, json: {error: "invalid session"}
+      if url_list_name.nil?
+        render status: 400, json: {error: "URL list not specified"}
         return
       end
 
       if user_signed_in?
-        site = current_user.sites.find_by name: site_name
-        # FIXME: 非常にアレな実装。repository_nameとかを使うべき
-        site_name = current_user.uuid + "-" + site_name
+        url_list = current_user.url_lists.find_by name: url_list_name
+        repository_name = current_user.uuid + "-" + url_list_name
       else
-        site = UrlList.find_by name: site_name
+        url_list = UrlList.find_by name: url_list_name
+        repository_name = url_list_name
       end
 
-      if site.nil?
-        render status: 400, json: {error: "invalid session"}
+      if url_list.nil?
+        render status: 400, json: {error: "URL list not found"}
         return
       end
 
-      if site.urls.empty?
+      if url_list.urls.empty?
         render status: 400, json: {error: "empty URL list"}
         return
       end
@@ -110,13 +94,9 @@ class InnerApiController < ApplicationController
 
       if index == 0
         @@screen_shooters[session_id] = ScreenShooter.new
-
-        if params[:breakpoint] != "all"
-          @@screen_shooters[session_id].set_width BREKPONT_TO_WIDTH[params[:breakpoint]]
-        end
       end
 
-      Dir.chdir("repo/#{site_name}") do
+      Dir.chdir("repo/#{repository_name}") do
         begin
           if params[:breakpoint] == "all"
             for breakpoint in BREAKPOINTS
@@ -124,6 +104,7 @@ class InnerApiController < ApplicationController
               @@screen_shooters[session_id].shoot urls[index], breakpoint
             end
           else
+            @@screen_shooters[session_id].set_width BREKPONT_TO_WIDTH[params[:breakpoint]]
             @@screen_shooters[session_id].shoot urls[index], params[:breakpoint]
           end
         rescue => e
@@ -155,26 +136,22 @@ class InnerApiController < ApplicationController
 
   def push_repository
     begin
-      if user_signed_in?
-        site_name = user_session["current_site_name"]
-      else
-        site_name = params[:list_name]
-      end
+      site_name = params[:list_name]
 
       if site_name.nil?
-        render status: 400, json: {error: "invalid session"}
+        render status: 400, json: {error: "URL list not specified"}
         return
       end
 
       if user_signed_in?
-        site = current_user.sites.find_by name: site_name
+        site = current_user.url_lists.find_by name: site_name
         site_name = current_user.uuid + "-" + site_name
       else
         site = UrlList.find_by name: site_name
       end
 
       if site.nil?
-        render status: 400, json: {error: "invalid session"}
+        render status: 400, json: {error: "URL list not found"}
         return
       end
 

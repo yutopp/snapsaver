@@ -92,11 +92,10 @@ class InnerApiControllerTest < ActionController::TestCase
     setup do
       @user = FactoryGirl.create(:user)
       @url_list.user = @user
-      sign_in :user, @user
+      p sign_in @user
     end
 
     test "make_id" do
-      @request.env["devise.mapping"] = Devise.mappings[:user]
       post :make_id
 
       assert_response :bad_request
